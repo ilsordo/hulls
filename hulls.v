@@ -69,6 +69,7 @@ Definition step5 csq_orig t csq_new :=
   end.
 
 (*** Tests step1, step4, step5  ***)
+(*****
 Definition test1 := {{[1,2,3],[2,3,4]}}.
 Compute (TS.elements (step1 test1 [1,2,3] {{}})).
 
@@ -80,6 +81,7 @@ Compute (TS.elements (step4 test4 [1,2,3] {{}})).
 
 Definition test5 := {{[1,2,3],[1,2,4],[1,2,5],[1,3,4],[1,4,5]}}.
 Compute (TS.elements (step5 test5 [1,2,3] {{}})).
+*****)
 
 Definition step145 csq_orig :=
   let csq_new := TS.fold (step1 csq_orig) csq_orig TS.empty in
