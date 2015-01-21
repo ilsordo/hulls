@@ -178,8 +178,6 @@ Proof.
     case_eq (TS.mem [a, b, n0] csq_orig); intro.
     + rewrite H4 in *; auto.
     + rewrite H4 in *.
-      apply SetFacts.add_iff in H3.
-      destruct H3.
 
 Admitted.
 
