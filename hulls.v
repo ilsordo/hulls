@@ -23,7 +23,7 @@ Definition step1 csq_orig t csq_new :=
       insert csq_orig [b,c,a] csq_new
   end.
 
-Definition step4_aux csq_orig a b d t csq_new :=
+Definition step4_aux a b d csq_orig t csq_new :=
   match t with
       [b',c,d'] =>
       if N2.eq_dec (b,d) (b',d') then
@@ -41,7 +41,7 @@ Definition step4 csq_orig t csq_new :=
       TS.fold (step4_aux csq_orig a b d) csq_orig csq_new
   end.
 
-Definition step5_aux_aux csq_orig a b c d t csq_new :=
+Definition step5_aux_aux a b c d csq_orig t csq_new :=
   match t with
       [a',b',e] =>
       if N2.eq_dec (a, b) (a' ,b') then
@@ -53,11 +53,11 @@ Definition step5_aux_aux csq_orig a b c d t csq_new :=
         csq_new
   end.
 
-Definition step5_aux csq_orig a b c t csq_new :=
+Definition step5_aux a b c csq_orig t csq_new :=
   match t with
       [a',b',d] =>
       if N2.eq_dec (a, b) (a' ,b') then
-        TS.fold (step5_aux_aux csq_orig a b c d) csq_orig csq_new
+        TS.fold (step5_aux_aux a b c d csq_orig) csq_orig csq_new
       else
         csq_new
   end.
@@ -65,7 +65,7 @@ Definition step5_aux csq_orig a b c t csq_new :=
 Definition step5 csq_orig t csq_new :=
   match t with
       [a,b,d] =>
-      TS.fold (step5_aux csq_orig a b d) csq_orig csq_new
+      TS.fold (step5_aux a b d csq_orig) csq_orig csq_new
   end.
 
 (*** Tests step1, step4, step5  ***)
@@ -118,6 +118,12 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Conseq_trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
 
 Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), Conseqs csq_orig csq_new -> Conseqs csq_orig (step csq_orig t csq_new).
+
+Lemma step5_aux_correct :
+
+Lemma step5_correct : step_correct step5.
+Proof.
+  unfold
 
 Lemma fold_step_correct :
   forall csq_orig csq_new step,
