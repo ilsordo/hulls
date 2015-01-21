@@ -38,7 +38,7 @@ Definition step4_aux a b d csq_orig t csq_new :=
 Definition step4 csq_orig t csq_new :=
   match t with
       [a,b,d] =>
-      TS.fold (step4_aux csq_orig a b d) csq_orig csq_new
+      TS.fold (step4_aux a b d csq_orig) csq_orig csq_new
   end.
 
 Definition step5_aux_aux a b c d csq_orig t csq_new :=
