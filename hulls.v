@@ -10,7 +10,7 @@ Module N2 := PairOrderedType Nat_as_OT Nat_as_OT.
 Module Triangle := PairOrderedType Nat_as_OT N2.
 Module TS := MSetAVL.Make Triangle.
 
-Module TS_Facts := MSetFacts.Facts TS.
+Module SetFacts := MSetFacts.Facts TS.
 Module SetProps := MSetProperties.Properties(TS).
 
 Lemma eq_is_eq : forall x y, Triangle.eq x y -> x = y.
@@ -143,9 +143,6 @@ Definition step_correct step := forall csq_orig csq_new (t : Triangle.t),
 
 Hint Constructors Conseq Conseqs.
 
-Require Coq.MSets.MSetFacts.
-Module SetFacts := MSetFacts.WFacts(TS).
-
 Lemma step1_correct : step_correct step1.
 Proof.
   unfold step_correct.
@@ -167,8 +164,26 @@ Proof.
     + apply H0; auto.
 Qed.
 
-Lemma step4_aux_correct : True.
+Lemma step4_aux_correct :
+  forall a b c csq_orig t csq_new,
+    TS.In [a,b,c] csq_orig ->
+    TS.In t csq_orig ->
+    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
+    Conseqs csq_orig (step4_aux a b c csq_orig t csq_new).    
 Proof.
+  intros.
+  destruct t; destruct p.
+  unfold step4_aux.
+  destruct (N2.eq_dec (b, c) (n, n1)).
+  constructor. 
+  case_eq (TS.mem [n0, a, c] csq_orig).
+  - intros; simpl.
+    apply H1.
+    unfold insert in H3.
+    case_eq (TS.mem [a, b, n0] csq_orig); intro.
+    + rewrite H4 in *; auto.
+    + rewrite H4 in *.
+
 Admitted.
 
 Lemma step4_correct : step_correct step4.
@@ -205,12 +220,25 @@ Proof.
   destruct (Triangle.eq_dec [x, y, z] [a, c, e]).
   + compute in e0. destruct e0 as [ea e0]. destruct e0 as [ec ee]. subst.
     apply andb_prop in eq. destruct eq as [Hmem1 Hmem2].
-    apply TS_Facts.mem_2 in Hmem1. apply TS_Facts.mem_2 in Hmem2.
+    apply SetFacts.mem_2 in Hmem1. apply SetFacts.mem_2 in Hmem2.
     apply (Rule5 csq_orig a b c d e); try assumption.
-  + apply Hacc. apply TS_Facts.add_3 with (x := [a, c, e]).
+  + apply Hacc. apply SetFacts.add_3 with (x := [a, c, e]).
     * compute. compute in n. intuition.
     * exact Ht'.
 Qed.
+
+Lemma step5_aux_correct :
+  forall a b c csq_orig csq_new t,
+    TS.In [a,b,c] csq_orig ->
+    TS.In t csq_orig ->
+    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
+    Conseqs csq_orig (step5_aux a b c csq_orig t csq_new).
+Proof.
+  intros a b c csq_orig csq_new (a',(b',e)) Habc Ht Hacc.
+  unfold step5_aux.
+  destruct (N2.eq_dec (a, b) (a', b')); [|constructor; exact Hacc].
+  apply SetProps.fold_rec with .
+
 
 Lemma step5_correct : step_correct step5.
 Proof.
