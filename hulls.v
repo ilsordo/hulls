@@ -1,14 +1,16 @@
 Require Import Bool Arith List Psatz Coq.Unicode.Utf8.
-Require Import Coq.Structures.OrdersEx.
-Require Import Coq.Structures.Orders.
+Require Import Structures.OrdersEx.
+Require Import Structures.Orders.
 Require Import MSetAVL.
 
+Require MSets.MSetFacts.
 Require Coq.MSets.MSetProperties.
 
 Module N2 := PairOrderedType Nat_as_OT Nat_as_OT.
 Module Triangle := PairOrderedType Nat_as_OT N2.
 Module TS := MSetAVL.Make Triangle.
 
+Module TS_Facts := MSetFacts.Facts TS.
 Module SetProps := MSetProperties.Properties(TS).
 
 Lemma eq_is_eq : forall x y, Triangle.eq x y -> x = y.
@@ -165,26 +167,31 @@ Lemma step5_aux_aux_correct :
     TS.In [a,b,c] csq_orig ->
     TS.In [a,b,d] csq_orig ->
     TS.In t csq_orig ->
-    Conseqs csq_orig csq_new ->
+    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
     Conseqs csq_orig (step5_aux_aux a b c d csq_orig t csq_new).
 Proof.
   intros a b c d csq_orig csq_new (a',(b',e)) Habc Habd Ht Hacc.
   unfold step5_aux_aux.
-  destruct (N2.eq_dec (a, b) (a', b')); [ |exact Hacc].
+  destruct (N2.eq_dec (a, b) (a', b')); [ |constructor; exact Hacc].
   compute in e0.
   destruct e0 as [ea eb].
   symmetry in ea,eb. subst.
-  case_eq (TS.mem [a, c, d] csq_orig && TS.mem [a, d, e] csq_orig); [ |intros; exact Hacc].
+  case_eq (TS.mem [a, c, d] csq_orig && TS.mem [a, d, e] csq_orig); [ |intros; constructor; exact Hacc].
   intro eq.
   unfold insert.
-  destruct (TS.mem [a, c, e] csq_orig); [exact Hacc |].
-  constructor.
+  case_eq (TS.mem [a, c, e] csq_orig); [intros; constructor; exact Hacc |].
+  intro Hace.
+  apply Conseq_add.
   intros (x,(y,z)) Ht'.
   destruct (Triangle.eq_dec [x, y, z] [a, c, e]).
   + compute in e0. destruct e0 as [ea e0]. destruct e0 as [ec ee]. subst.
+    apply andb_prop in eq. destruct eq as [Hmem1 Hmem2].
+    apply TS_Facts.mem_2 in Hmem1. apply TS_Facts.mem_2 in Hmem2.
     apply (Rule5 csq_orig a b c d e); try assumption.
-    * apply andb_prop in eq. destruct eq as [Hmem1 Hmem2].
-Admitted.
+  + apply Hacc. apply TS_Facts.add_3 with (x := [a, c, e]).
+    * compute. compute in n. intuition.
+    * exact Ht'.
+Qed.
 
 Lemma step5_correct : step_correct step5.
 Proof.
