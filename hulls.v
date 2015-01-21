@@ -3,9 +3,20 @@ Require Import Coq.Structures.OrdersEx.
 Require Import Coq.Structures.Orders.
 Require Import MSetAVL.
 
+Print Nat_as_OT.eq.
+
 Module N2 := PairOrderedType Nat_as_OT Nat_as_OT.
 Module Triangle := PairOrderedType Nat_as_OT N2.
 Module TS := MSetAVL.Make Triangle.
+
+Lemma eq_is_eq : forall x y, Triangle.eq x y -> x = y.
+Proof.
+  intros [x1 [x2 x3]] [y1 [y2 y3]] H.
+  compute in *.
+  intuition.
+  subst.
+  auto.
+Qed.
 
 Notation "[ x , y , z ]" := (x,(y,z)).
 Notation "{{ x , .. , y }}" := (TS.add x .. (TS.add y TS.empty) .. ).
@@ -128,7 +139,14 @@ Proof.
   apply Conseq_add.
   intros.
   destruct t; destruct p.
-  apply Id.
+  unfold insert in H1.
+  destruct (Triangle.eq_dec [n2,n3,n4] [n0,n1,n]).
+  - apply eq_is_eq in e.
+    rewrite e in *.
+    apply Rule1; auto.
+  - simpl H1.
+    
+
 Admitted.
 
 Lemma step5_aux_correct :
