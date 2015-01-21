@@ -159,8 +159,28 @@ Proof.
     + apply H0; auto.
 Qed.
 
-Lemma step4_aux_correct : True.
+Lemma step4_aux_correct :
+  forall a b c csq_orig t csq_new,
+    TS.In [a,b,c] csq_orig ->
+    TS.In t csq_orig ->
+    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
+    Conseqs csq_orig (step4_aux a b c csq_orig t csq_new).    
 Proof.
+  intros.
+  destruct t; destruct p.
+  unfold step4_aux.
+  destruct (N2.eq_dec (b, c) (n, n1)).
+  constructor. 
+  case_eq (TS.mem [n0, a, c] csq_orig).
+  - intros; simpl.
+    apply H1.
+    unfold insert in H3.
+    case_eq (TS.mem [a, b, n0] csq_orig); intro.
+    + rewrite H4 in *; auto.
+    + rewrite H4 in *.
+      apply SetFacts.add_iff in H3.
+      destruct H3.
+
 Admitted.
 
 Lemma step4_correct : step_correct step4.
