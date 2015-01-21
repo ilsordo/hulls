@@ -162,6 +162,20 @@ Proof.
     + apply H0; auto.
 Qed.
 
+Lemma step4_aux_correct : True.
+Proof.
+Admitted.
+
+Lemma step4_correct : step_correct step4.
+Proof.
+  unfold step_correct; intros.
+  apply Conseq_add.
+  intros.
+  destruct t; destruct p.
+  destruct t0; destruct p.
+  simpl in H1.
+Admitted.
+
 Lemma step5_aux_aux_correct :
   forall a b c d csq_orig csq_new t,
     TS.In [a,b,c] csq_orig ->
