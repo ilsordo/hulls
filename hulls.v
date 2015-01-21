@@ -3,9 +3,13 @@ Require Import Coq.Structures.OrdersEx.
 Require Import Coq.Structures.Orders.
 Require Import MSetAVL.
 
+Require Coq.MSets.MSetProperties.
+
 Module N2 := PairOrderedType Nat_as_OT Nat_as_OT.
 Module Triangle := PairOrderedType Nat_as_OT N2.
 Module TS := MSetAVL.Make Triangle.
+
+Module SetProps := MSetProperties.Properties(TS).
 
 Lemma eq_is_eq : forall x y, Triangle.eq x y -> x = y.
 Proof.
@@ -130,8 +134,8 @@ Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In 
 
 Hint Constructors Conseq Conseqs.
 
-Require Import Coq.MSets.MSetFacts.
-Module SetFacts := WFacts(TS).
+Require Coq.MSets.MSetFacts.
+Module SetFacts := MSetFacts.WFacts(TS).
 
 Lemma step1_correct : step_correct step1.
 Proof.
@@ -191,6 +195,34 @@ Proof.
   intros (a',(b',c')).
   intro.
 
+Lemma conseq_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
+    Conseq s1 k -> Conseq s2 k.
+Proof.
+  intros. unfold TS.Equal in EQ. induction H; firstorder. 
+  + constructor 3 with d; firstorder.
+  + constructor 4 with b d; firstorder.
+Qed.    
+
+Lemma conseqs_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
+    Conseqs s1 k -> Conseqs s2 k.
+Proof.
+  intros.
+  induction H.
+  + econstructor 1. eauto using conseq_congr.
+  + econstructor 2; eauto. 
+Qed.  
+
+
+Lemma fold_step_correct :
+  forall csq_new csq_orig step,
+    Conseqs csq_orig csq_new ->
+    step_correct step ->
+    Conseqs csq_orig (TS.fold (step csq_orig) csq_orig csq_new).
+Proof.
+  Hint Resolve conseq_congr conseqs_congr.
+  intros; eapply SetProps.fold_rec_nodep; intros; eauto.
+Qed.
+
 Lemma fold_step_correct :
   forall csq_orig csq_new step,
     Conseqs csq_orig csq_new ->
@@ -200,7 +232,7 @@ Proof.
 
 Admitted.
 
-Lemma step145_correct : forall ts t, Conseqs ts (csq_proj (step145 ts))
+Lemma step145_correct : forall ts t, Conseqs ts (csq_proj (step145 ts)).
 Proof.
 
 Admitted.
