@@ -223,13 +223,6 @@ Proof.
   intros; eapply SetProps.fold_rec_nodep; intros; eauto.
 Qed.
 
-Lemma fold_step_correct :
-  forall csq_orig csq_new step,
-    Conseqs csq_orig csq_new ->
-    step_correct step ->
-    Conseqs csq_orig (TS.fold (step csq_orig) csq_orig csq_new).
-Proof.
-
 Admitted.
 
 Lemma step145_correct : forall ts t, Conseqs ts (csq_proj (step145 ts)).
