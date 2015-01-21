@@ -69,7 +69,6 @@ Definition step5 csq_orig t csq_new :=
   end.
 
 (*** Tests step1, step4, step5  ***)
-Definition t123 := [1,2,3].
 Definition t231 := [2,3,1].
 Definition t243 := [2,4,3].
 Definition t413 := [4,1,3].
