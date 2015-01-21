@@ -69,6 +69,15 @@ Definition step5 csq_orig t csq_new :=
   end.
 
 (*** Tests step1, step4, step5  ***)
+Definition test1 := {{[1,2,3],[2,3,4]}}.
+Compute (TriangleSet.elements (step1 test1 [1,2,3] {{}})).
+
+Definition test1' := {{[1,2,3],[2,3,1]}}.
+Compute (TriangleSet.elements (step1 test1' [1,2,3] {{}})).
+
+Definition test4 := {{[1,2,3],[2,4,3],[4,1,3]}}.
+Compute (TriangleSet.elements (step4 test4 [1,2,3] {{}})).
+
 Definition test5 := {{[1,2,3],[1,2,4],[1,2,5],[1,3,4],[1,4,5]}}.
 Compute (TriangleSet.elements (step5 test5 [1,2,3] {{}})).
 
