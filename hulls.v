@@ -147,16 +147,15 @@ Proof.
   intros.
   destruct t; destruct p.
   unfold insert in H1.
-  destruct (Triangle.eq_dec [n2,n3,n4] [n0,n1,n]).
+  destruct (Triangle.eq_dec [n0,n1,n] [n2,n3,n4]).
   - apply eq_is_eq in e.
-    rewrite e in *.
+    rewrite <- e in *.
     apply Rule1; auto.
   - simpl H1.
     apply Id.
     assert (TS.In [n2, n3, n4] csq_new).
     + destruct (TS.mem [n0, n1, n] csq_orig); auto.
-      assert (¬Triangle.eq [n0, n1, n] [n2, n3, n4]) by admit.
-      apply (SetFacts.add_neq_iff csq_new) in H2.
+      apply (SetFacts.add_neq_iff csq_new) in n5.
       intuition.
     +
 Admitted.
