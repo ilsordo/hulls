@@ -77,6 +77,8 @@ Definition step5_aux a b c csq_orig t csq_new :=
         csq_new
   end.
 
+
+
 Definition step5 csq_orig t csq_new :=
   match t with
       [a,b,d] =>
@@ -132,7 +134,7 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Conseq_add : forall ts ts', (forall t, (TS.In t ts') -> Conseq ts t) -> Conseqs ts ts'
   | Conseq_trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
 
-Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In t csq_orig -> Conseqs csq_orig csq_new -> Conseqs csq_orig (step csq_orig t csq_new).
+Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In t csq_orig -> (forall t', TS.In t' csq_new -> Conseq csq_orig t') -> Conseqs csq_orig (step csq_orig t csq_new).
 
 Hint Constructors Conseq Conseqs.
 
@@ -204,10 +206,10 @@ Proof.
 Lemma conseq_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
     Conseq s1 k -> Conseq s2 k.
 Proof.
-  intros. unfold TS.Equal in EQ. induction H; firstorder. 
+  intros. unfold TS.Equal in EQ. induction H; firstorder.
   + constructor 3 with d; firstorder.
   + constructor 4 with b d; firstorder.
-Qed.    
+Qed.
 
 Lemma conseqs_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
     Conseqs s1 k -> Conseqs s2 k.
@@ -215,8 +217,8 @@ Proof.
   intros.
   induction H.
   + econstructor 1. eauto using conseq_congr.
-  + econstructor 2; eauto. 
-Qed.  
+  + econstructor 2; eauto.
+Qed.
 
 
 Lemma fold_step_correct :
