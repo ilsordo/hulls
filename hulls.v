@@ -3,8 +3,6 @@ Require Import Coq.Structures.OrdersEx.
 Require Import Coq.Structures.Orders.
 Require Import MSetAVL.
 
-Print Nat_as_OT.eq.
-
 Module N2 := PairOrderedType Nat_as_OT Nat_as_OT.
 Module Triangle := PairOrderedType Nat_as_OT N2.
 Module TS := MSetAVL.Make Triangle.
@@ -130,6 +128,8 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
 
 Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In t csq_orig -> Conseqs csq_orig csq_new -> Conseqs csq_orig (step csq_orig t csq_new).
 
+Hint Constructors Conseq Conseqs.
+
 Lemma step1_correct : step_correct step1.
 Proof.
   unfold step_correct.
@@ -145,7 +145,11 @@ Proof.
     rewrite e in *.
     apply Rule1; auto.
   - simpl H1.
-    
+    apply Id.
+    assert (TS.In [n2, n3, n4] csq_new).
+    + destruct (TS.mem [n0, n1, n] csq_orig); auto.
+      
+    + eauto.
 
 Admitted.
 
