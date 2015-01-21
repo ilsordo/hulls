@@ -8,6 +8,8 @@ Module Triangle := PairOrderedType Nat_as_OT N2.
 Module TriangleSet := MSetAVL.Make Triangle.
 
 Notation "[ x , y , z ]" := (x,(y,z)).
+Notation "{{ x , .. , y }}" := (TriangleSet.add x .. (TriangleSet.add y TriangleSet.empty) .. ).
+Notation "{{}}" := TriangleSet.empty.
 
 Definition insert csq_orig t csq_new :=
   if TriangleSet.mem t csq_orig then
@@ -39,7 +41,6 @@ Definition step4 csq_orig t csq_new :=
       TriangleSet.fold (step4_aux csq_orig a b d) csq_orig csq_new
   end.
 
-<<<<<<< Updated upstream
 Definition step5_aux_aux csq_orig a b c d t csq_new :=
   match t with
       [a',b',e] =>
@@ -58,7 +59,7 @@ Definition step5_aux csq_orig a b c t csq_new :=
       if N2.eq_dec (a, b) (a' ,b') then
         TriangleSet.fold (step5_aux_aux csq_orig a b c d) csq_orig csq_new
       else
-        csq_orig
+        csq_new
   end.
 
 Definition step5 csq_orig t csq_new :=
@@ -66,7 +67,7 @@ Definition step5 csq_orig t csq_new :=
       [a,b,d] =>
       TriangleSet.fold (step5_aux csq_orig a b d) csq_orig csq_new
   end.
-=======
+
 (*** Tests step1, step4, step5  ***)
 Definition t123 := [1,2,3].
 Definition t231 := [2,3,1].
@@ -75,6 +76,9 @@ Definition t413 := [4,1,3].
 Definition t253 := [2,5,3].
 Definition t513 := [5,1,3].
 Definition t125 := [1,2,5].
+
+Definition test5 := {{[1,2,3],[1,2,4],[1,2,5],[1,3,4],[1,4,5]}}.
+Compute (TriangleSet.elements (step5 test5 [1,2,3] {{}})).
 
 Definition set1 := TriangleSet.add t123 TriangleSet.empty.
 Definition set1' := TriangleSet.add t231 set1.
@@ -91,4 +95,3 @@ Compute (step1 set3 t123 TriangleSet.empty).
 Compute (step4 set3 t123 TriangleSet.empty).
 Compute (step4 set5 t123 TriangleSet.empty).
 Compute (step4 set5' t123 TriangleSet.empty).
->>>>>>> Stashed changes
