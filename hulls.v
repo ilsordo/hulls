@@ -69,28 +69,6 @@ Definition step5 csq_orig t csq_new :=
   end.
 
 (*** Tests step1, step4, step5  ***)
-Definition t231 := [2,3,1].
-Definition t243 := [2,4,3].
-Definition t413 := [4,1,3].
-Definition t253 := [2,5,3].
-Definition t513 := [5,1,3].
-Definition t125 := [1,2,5].
-
 Definition test5 := {{[1,2,3],[1,2,4],[1,2,5],[1,3,4],[1,4,5]}}.
 Compute (TriangleSet.elements (step5 test5 [1,2,3] {{}})).
 
-Definition set1 := TriangleSet.add t123 TriangleSet.empty.
-Definition set1' := TriangleSet.add t231 set1.
-Definition set2 := TriangleSet.add t243 set1.
-Definition set3 := TriangleSet.add t413 set2.
-Definition set4 := TriangleSet.add t253 set3.
-Definition set5 := TriangleSet.add t513 set4.
-Definition set5' := TriangleSet.add t125 set5.
-
-Compute (step1 set1 t123 TriangleSet.empty).
-Compute (step1 set1' t123 TriangleSet.empty).
-Compute (step1 set3 t123 TriangleSet.empty).
-
-Compute (step4 set3 t123 TriangleSet.empty).
-Compute (step4 set5 t123 TriangleSet.empty).
-Compute (step4 set5' t123 TriangleSet.empty).
