@@ -130,6 +130,9 @@ Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In 
 
 Hint Constructors Conseq Conseqs.
 
+Require Import Coq.MSets.MSetFacts.
+Module SetFacts := WFacts(TS).
+
 Lemma step1_correct : step_correct step1.
 Proof.
   unfold step_correct.
@@ -148,9 +151,10 @@ Proof.
     apply Id.
     assert (TS.In [n2, n3, n4] csq_new).
     + destruct (TS.mem [n0, n1, n] csq_orig); auto.
-      
-    + eauto.
-
+      assert (¬Triangle.eq [n0, n1, n] [n2, n3, n4]) by admit.
+      apply (SetFacts.add_neq_iff csq_new) in H2.
+      intuition.
+    +
 Admitted.
 
 Lemma step5_aux_aux_correct :
