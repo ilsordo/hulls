@@ -117,7 +117,19 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Conseq_add : forall ts ts', (forall t, (TS.In t ts') -> Conseq ts t) -> Conseqs ts ts'
   | Conseq_trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
 
-Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), Conseqs csq_orig csq_new -> Conseqs csq_orig (step csq_orig t csq_new).
+Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In t csq_orig -> Conseqs csq_orig csq_new -> Conseqs csq_orig (step csq_orig t csq_new).
+
+Lemma step1_correct : step_correct step1.
+Proof.
+  unfold step_correct.
+  intros.
+  destruct t; destruct p.
+  simpl.
+  apply Conseq_add.
+  intros.
+  destruct t; destruct p.
+  apply Id.
+Admitted.
 
 Lemma step5_aux_correct :
 
