@@ -153,11 +153,39 @@ Proof.
 
 Admitted.
 
-Lemma step5_aux_correct :
+Lemma step5_aux_aux_correct :
+  forall a b c d csq_orig csq_new t,
+    TS.In [a,b,c] csq_orig ->
+    TS.In [a,b,d] csq_orig ->
+    TS.In t csq_orig ->
+    Conseqs csq_orig csq_new ->
+    Conseqs csq_orig (step5_aux_aux a b c d csq_orig t csq_new).
+Proof.
+  intros a b c d csq_orig csq_new (a',(b',e)) Habc Habd Ht Hacc.
+  unfold step5_aux_aux.
+  destruct (N2.eq_dec (a, b) (a', b')); [ |exact Hacc].
+  compute in e0.
+  destruct e0 as [ea eb].
+  symmetry in ea,eb. subst.
+  case_eq (TS.mem [a, c, d] csq_orig && TS.mem [a, d, e] csq_orig); [ |intros; exact Hacc].
+  intro eq.
+  unfold insert.
+  destruct (TS.mem [a, c, e] csq_orig); [exact Hacc |].
+  constructor.
+  intros (x,(y,z)) Ht'.
+  destruct (Triangle.eq_dec [x, y, z] [a, c, e]).
+  + compute in e0. destruct e0 as [ea e0]. destruct e0 as [ec ee]. subst.
+    apply (Rule5 csq_orig a b c d e); try assumption.
+    * apply andb_prop in eq. destruct eq as [Hmem1 Hmem2].
+Admitted.
 
 Lemma step5_correct : step_correct step5.
 Proof.
-  unfold
+  unfold step_correct, step5.
+  intros csq_orig csq_new (a,(b,c)) T_in_csq Hrec.
+  constructor.
+  intros (a',(b',c')).
+  intro.
 
 Lemma fold_step_correct :
   forall csq_orig csq_new step,
