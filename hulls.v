@@ -155,14 +155,12 @@ Proof.
   - apply eq_is_eq in e.
     rewrite <- e in *.
     apply Rule1; auto.
-  - simpl H1.
-    apply Id.
-    assert (TS.In [n2, n3, n4] csq_new).
+  - assert (TS.In [n2, n3, n4] csq_new).
     + destruct (TS.mem [n0, n1, n] csq_orig); auto.
       apply (SetFacts.add_neq_iff csq_new) in n5.
       intuition.
-    +
-Admitted.
+    + apply H0; auto.
+Qed.
 
 Lemma step5_aux_aux_correct :
   forall a b c d csq_orig csq_new t,
