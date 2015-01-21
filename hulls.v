@@ -38,3 +38,30 @@ Definition step4 csq_orig t csq_new :=
       [a,b,d] =>
       TriangleSet.fold (step4_aux csq_orig a b d) csq_orig csq_new
   end.
+
+Definition step5_aux_aux csq_orig a b c d t csq_new :=
+  match t with
+      [a',b',e] =>
+      if N2.eq_dec (a, b) (a' ,b') then
+        if TriangleSet.mem [a,c,d] csq_orig && TriangleSet.mem [a,d,e] csq_orig then
+          insert csq_orig [a,c,e] csq_new
+        else
+          csq_new
+      else
+        csq_new
+  end.
+
+Definition step5_aux csq_orig a b c t csq_new :=
+  match t with
+      [a',b',d] =>
+      if N2.eq_dec (a, b) (a' ,b') then
+        TriangleSet.fold (step5_aux_aux csq_orig a b c d) csq_orig csq_new
+      else
+        csq_orig
+  end.
+
+Definition step5 csq_orig t csq_new :=
+  match t with
+      [a,b,d] =>
+      TriangleSet.fold (step5_aux csq_orig a b d) csq_orig csq_new
+  end.
