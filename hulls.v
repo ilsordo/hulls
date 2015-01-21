@@ -81,3 +81,20 @@ Compute (TriangleSet.elements (step4 test4 [1,2,3] {{}})).
 Definition test5 := {{[1,2,3],[1,2,4],[1,2,5],[1,3,4],[1,4,5]}}.
 Compute (TriangleSet.elements (step5 test5 [1,2,3] {{}})).
 
+Definition step145 csq_orig :=
+  let csq_new := TriangleSet.fold (step1 csq_orig) csq_orig TriangleSet.empty in
+  let csq_new' := TriangleSet.fold (step4 csq_orig) csq_orig csq_new in
+  let csq_new'' := TriangleSet.fold (step5 csq_orig) csq_orig csq_new' in
+  if TriangleSet.is_empty csq_new then
+    inl csq_orig
+  else
+    inr (TriangleSet.union csq_orig csq_new).
+
+Fixpoint sat145 csq fuel {struct fuel} :=
+  match fuel with
+    | O => csq
+    | S p => match step145 csq with
+               | inl csq' => csq'
+               | inr csq' => sat145 csq' p
+             end
+  end.
