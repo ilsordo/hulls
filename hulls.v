@@ -377,24 +377,37 @@ Definition refute l := refute' (triplets_to_triangles (enumerate 3 5)) (sat145 l
 Notation "x ∈ y" := (TS.In x y ) (at level 10).
 
 Section FINAL.
-Parameter A : Type.
-Parameter oriented : A -> A -> A -> Prop.
-Parameter inj : nat -> A.
-Parameter inj_inj : ∀ x y, inj x = inj y -> x = y.
-Definition δ t := match t with [x, y, z] => oriented (inj x) (inj y) (inj z) end.
-Parameter rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
-Parameter rule2 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] -> ¬δ [c, b, a].
-Parameter rule3 : forall a b c, δ [a, b, c] ∨ δ [c, b, a].
-Parameter rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
-Parameter rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
-Parameter hyps : TS.t.
-Hypothesis hyps_spec : forall x, x ∈ hyps -> δ x.
-Parameter ziel : Triangle.t.
+  Parameter A : Type.
+  Parameter oriented : A -> A -> A -> Prop.
+  Parameter inj : nat -> A.
+  Parameter inj_inj : ∀ x y, inj x = inj y -> x = y.
+  Definition δ t := match t with [x, y, z] => oriented (inj x) (inj y) (inj z) end.
+  Definition Δ := TS.For_all δ.
+  Parameter rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
+  Parameter rule2 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] -> ¬δ [c, b, a].
+  Parameter rule3 : forall a b c, δ [a, b, c] ∨ δ [c, b, a].
+  Parameter rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
+  Parameter rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
+  Parameter hyps : TS.t.
+  Hypothesis hyps_spec : Δ hyps.
+  Parameter ziel : Triangle.t.
 
-Hypothesis refute_true : refute (TS.add ziel hyps) = true.
+  Lemma Conseqs_spec : forall ts ts', Conseqs ts ts' -> Δ ts -> Δ ts'.
+  Admitted.
 
-Theorem cool : False.
-Proof.
-Admitted.  
+  Lemma sat145_spec : forall ts fuel, Δ ts -> Δ (sat145 ts fuel).
+  Admitted.
+
+  Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
+  Admitted.
+
+  Lemma refute_spec : forall ts, Δ ts -> refute ts = true -> False.
+  Admitted.
+
+  Hypothesis refute_true : refute (TS.add ziel hyps) = true.
+
+  Theorem cool : False.
+  Proof.
+  Admitted.
 
 End FINAL.
