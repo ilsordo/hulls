@@ -322,11 +322,37 @@ Check inconsistent.
 Fixpoint refute (worklist : list Triangle.t) (problem : TS.t) :=
   match worklist with
       | nil => false
-      | [m,n,p]::remaining_worklist =>
+      | [m,n,p]::wl =>
         inconsistent problem ||
-                     (refute remaining_worklist (TS.add [m,n,p] problem) &&
-                                  refute remaining_worklist (TS.add [m,p,n] problem))
+                     (refute wl (sat145 (TS.add [m,n,p] problem) 1000) &&
+                                  refute wl (sat145 (TS.add [m,p,n] problem) 1000))
+  end.
+ 
+Fixpoint enumerate len n : list (list nat) :=
+  match n with
+      O => nil
+    | S p =>
+      match len with
+        | O => nil::nil
+        | S l =>
+          List.map (fun e => 1::List.map (fun x => x + 1) e)
+                   (enumerate l p)++
+                   List.map (fun e => List.map (fun x => x + 1) e)
+                   (enumerate (S l) p)
+      end
   end.
 
-(* Definition problem5 := {{[1,2,3], [1,3,2]}}.
-Compute refute ([1,3,2]::nil) problem5. *)
+Definition triplets_to_triangles :=
+  List.map (
+      fun triplet => match triplet with
+                       | a::b::c::nil => [a,b,c]
+                       | _ => [1,1,1]
+                     end
+    )
+.
+
+(* abc ∧ abd ∧ abe ∧ bcd ∧ bec *)
+Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,5,3]}}.
+Compute refute (triplets_to_triangles (enumerate 3 5)) canonical_problem.
+
+Compute TS.elements (sat145 canonical_problem 1000).
