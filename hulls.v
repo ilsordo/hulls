@@ -168,21 +168,34 @@ Lemma step4_aux_correct :
     Conseqs_imm csq_orig csq_new ->
     Conseqs_imm csq_orig (step4_aux a b c csq_orig t csq_new).
 Proof.
-Admitted.
-(*
   intros.
   destruct t; destruct p.
   unfold step4_aux.
+  unfold Conseqs_imm.
+  intros.
   destruct (N2.eq_dec (b, c) (n, n1)).
-  constructor.
-  case_eq (TS.mem [n0, a, c] csq_orig).
-  - intros; simpl.
-    apply H1.
-    unfold insert in H3.
-    case_eq (TS.mem [a, b, n0] csq_orig); intro.
-    + rewrite H4 in *; auto.
-    + rewrite H4 in *.
-*)
+  - case_eq (TS.mem [n0, a, c] csq_orig).
+    + intros.
+      rewrite H3 in H2.
+      unfold insert in H2.
+      case_eq (TS.mem [a, b, n0] csq_orig); intro.
+      * rewrite H4 in *; auto.
+      * rewrite H4 in *.
+        unfold Conseqs_imm in H1.
+        destruct t; destruct p.
+        compute in e; intuition; subst.
+        destruct (Triangle.eq_dec [a,n,n0] [n2,n3,n4]).
+        { compute in e.
+          intuition; subst.
+          apply (Rule4 csq_orig n2 n3 n4 n1); repeat (intuition).
+        }
+        apply (SetFacts.add_neq_iff csq_new) in n5.
+        intuition.
+    + intros.
+      rewrite H3 in H2.
+      intuition.
+  - intuition.
+Qed.
 
 Lemma step4_correct : step_correct step4.
 Proof.
