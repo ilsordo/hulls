@@ -288,6 +288,11 @@ Proof.
       assert (Conseqs_imm orig x)
     end.
     { repeat (eapply fold_step_correct); eauto. intro. 
+
+
+    }
+    Print step_correct.
+
     
 Admitted.
 
@@ -295,8 +300,13 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Imm : forall ts ts', Conseqs_imm ts ts' -> Conseqs ts ts'
   | Trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs_imm ts' ts'' -> Conseqs ts ts''.
 
-Theorem sat145_correct : forall ts fuel, Conseqs ts (sat145 ts fuel).
+Hint Constructors Conseqs.
+
+Theorem sat145_correct : forall fuel ts, Conseqs ts (sat145 ts fuel).
 Proof.
+  induction fuel; simpl.
+  - repeat constructor. auto.
+  - intro.
 
 Admitted.
 
