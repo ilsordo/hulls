@@ -277,7 +277,7 @@ Qed.
 
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
-  Hint Resolve step1_correct step4_correct step5_correct.
+  Hint Resolve step1_correct step4_correct step5_correct fold_step_correct.
   Require Import DLib.
   intros orig. destruct (step145 orig) eqn:eq. 
   + intro. simpl in *. unfold step145 in eq. flatten eq.
@@ -287,7 +287,7 @@ Proof.
     | [ |- Conseqs_imm orig (TS.union orig ?x)] =>
       assert (Conseqs_imm orig x)
     end.
-    { 
+    { repeat (eapply fold_step_correct); eauto. intro. 
 
 
     }
