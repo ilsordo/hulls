@@ -401,8 +401,30 @@ Section FINAL.
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
   Admitted.
 
-  Lemma refute_spec : forall ts, Δ ts -> refute ts = true -> False.
+  Lemma refute'_spec_axiom3: forall ts a b c,
+      Δ ts -> ¬Δ (TS.add [a, b, c] ts) -> ¬Δ (TS.add [a, c, b] ts) -> False.
   Admitted.
+    
+  Lemma refute'_spec : forall wl ts, Δ ts -> refute' wl ts = true -> False.
+  Proof.
+    intro. induction wl; intros. 
+    + simpl in *. discriminate.
+    + destruct a as (x1, (x2, x3)). unfold refute' in H0.
+      flatten H0.
+      * eauto using inconsistent_spec.
+      * apply negb_false_iff in Eq0.
+        eapply refute'_spec_axiom3 with (ts := ts) (a := x1) (b := x2) (c := x3); eauto; intros.
+        - intro. eapply IHwl in Eq0; eauto. eapply sat145_spec; eauto. 
+        - intro. eapply IHwl in H0; eauto. eapply sat145_spec; eauto.
+  Qed.
+
+          
+  Lemma refute_spec : forall ts, Δ ts -> refute ts = true -> False.
+  Proof.
+    intros. unfold refute in *. eauto using refute'_spec, sat145_spec.
+    Grab Existential Variables.
+    exact nil.
+  Qed.    
 
   Hypothesis refute_true : refute (TS.add ziel hyps) = true.
 
