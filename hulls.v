@@ -331,8 +331,9 @@ Fixpoint refute (worklist : list Triangle.t) (problem : TS.t) :=
       | nil => false
       | [m,n,p]::wl =>
         if inconsistent problem then true
-        else (refute wl (sat145 (TS.add [m,n,p] problem) 1000) &&
-                                  refute wl (sat145 (TS.add [m,p,n] problem) 1000))
+        else if negb (refute wl (sat145 (TS.add [m,n,p] problem) 1000))
+             then false
+             else refute wl (sat145 (TS.add [m,p,n] problem) 1000)
   end.
  
 Fixpoint enumerate len n : list (list nat) :=
@@ -363,6 +364,4 @@ Definition triplets_to_triangles :=
 
 (* abc ∧ abd ∧ abe ∧ bcd ∧ bce *)
 Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,3,5]}}.
-Compute refute (triplets_to_triangles (enumerate 3 5)) (sat145 canonical_problem 1000).
-
-Compute TS.elements (sat145 canonical_problem 1000).
+Compute refute (triplets_to_triangles (enumerate 3 6)) (sat145 canonical_problem 1000).
