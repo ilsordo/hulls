@@ -399,32 +399,24 @@ Section FINAL.
   Hypothesis ziel_not_degenerate : match ziel with [a, b, c] => distinct a b c end.
 
   Lemma Conseqs_imm_spec : forall ts ts', Conseqs_imm ts ts' -> Δ ts -> Δ ts'.
-    intros.
-    intro.
-    intro.
-    assert (Conseq ts x).
-    intuition.
-    induction H2.
-    + intuition.
-    + apply rule1; intuition.
-    + apply rule4 with d; intuition.
-    + apply rule5 with b d; intuition.
+  Proof.
+    Hint Resolve rule1.
+    intros ts ts' H HΔ x Hx.
+    assert (Conseq ts x) by intuition.
+    induction H0; [| | apply rule4 with d | apply rule5 with b d]; try intuition.
   Qed.
 
   Lemma Conseqs_spec : forall ts ts', Conseqs ts ts' -> Δ ts -> Δ ts'.
     intros.
-    induction H.
-    * apply (Conseqs_imm_spec ts ts'); assumption.
-    * apply IHConseqs.
-      apply (Conseqs_imm_spec ts ts'); assumption.
+    induction H; auto using (Conseqs_imm_spec ts ts').
   Qed.
 
   Lemma sat145_spec : forall ts fuel, Δ ts -> Δ (sat145 ts fuel).
-    Proof.
-      intro. intro.
-      assert (Conseqs ts (sat145 ts fuel)) by (apply sat145_correct).
-      intro; apply (Conseqs_spec ts (sat145 ts fuel)); repeat assumption.
-    Qed.
+  Proof.
+    intro. intro.
+    assert (Conseqs ts (sat145 ts fuel)) by (apply sat145_correct).
+    intro; apply (Conseqs_spec ts (sat145 ts fuel)); repeat assumption.
+  Qed.
 
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
   Proof.
@@ -451,17 +443,13 @@ Section FINAL.
     
   Lemma refute'_spec : forall wl ts, Δ ts -> refute' wl ts = true -> False.
   Proof.
-    intro. induction wl; intros. 
+    intro. induction wl; intros ts H H0. 
     + simpl in *. discriminate.
     + destruct a as (x1, (x2, x3)). unfold refute' in H0.
-      flatten H0.
-      * eauto using inconsistent_spec.
-      * apply negb_false_iff in Eq1.
-        eapply refute'_spec_axiom3 with (ts := ts) (a := x1) (b := x2) (c := x3); eauto; intros.
-        - eauto using distinct_spec.
-        - intro. eapply IHwl in Eq1; eauto. eapply sat145_spec; eauto. 
-        - intro. eapply IHwl in H0; eauto. eapply sat145_spec; eauto.
-      * eauto.
+      flatten H0; [eauto using inconsistent_spec | | eauto].
+      match goal with [H : negb _ = false |- _] => apply negb_false_iff in H end.
+      eapply refute'_spec_axiom3 with (ts := ts) (a := x1) (b := x2) (c := x3);
+        eauto; intros; eauto using sat145_spec, distinct_spec.
   Qed.
 
           
