@@ -396,7 +396,11 @@ Section FINAL.
   Admitted.
 
   Lemma sat145_spec : forall ts fuel, Δ ts -> Δ (sat145 ts fuel).
-  Admitted.
+    Proof.
+      intro. intro.
+      assert (Conseqs ts (sat145 ts fuel)) by (apply sat145_correct).
+      intro; apply (Conseqs_spec ts (sat145 ts fuel)); repeat assumption.
+    Qed.
 
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
   Admitted.
