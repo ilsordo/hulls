@@ -137,8 +137,8 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
 
 Definition Imm_csq old new := forall x, TS.In x new -> Conseq old x.
 
-Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), 
-    TS.In t csq_orig -> 
+Definition step_correct step := forall csq_orig csq_new (t : Triangle.t),
+    TS.In t csq_orig ->
     Imm_csq csq_orig csq_new ->
     Imm_csq csq_orig (step csq_orig t csq_new).
 
@@ -170,13 +170,13 @@ Lemma step4_aux_correct :
     TS.In [a,b,c] csq_orig ->
     TS.In t csq_orig ->
     (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
-    Conseqs csq_orig (step4_aux a b c csq_orig t csq_new).    
+    Conseqs csq_orig (step4_aux a b c csq_orig t csq_new).
 Proof.
   intros.
   destruct t; destruct p.
   unfold step4_aux.
   destruct (N2.eq_dec (b, c) (n, n1)).
-  constructor. 
+  constructor.
   case_eq (TS.mem [n0, a, c] csq_orig).
   - intros; simpl.
     apply H1.
@@ -214,14 +214,14 @@ Lemma step5_aux_aux_correct :
 Proof.
   intros a b c d csq_orig csq_new (a',(b',e)) Habc Habd Ht Hacc.
   unfold step5_aux_aux.
-  destruct (N2.eq_dec (a, b) (a', b')); [ |constructor; exact Hacc].
+  destruct (N2.eq_dec (a, b) (a', b')); [ |auto].
   compute in e0.
   destruct e0 as [ea eb].
   symmetry in ea,eb. subst.
-  case_eq (TS.mem [a, c, d] csq_orig && TS.mem [a, d, e] csq_orig); [ |intros; constructor; exact Hacc].
+  case_eq (TS.mem [a, c, d] csq_orig && TS.mem [a, d, e] csq_orig); [ |auto].
   intro eq.
   unfold insert.
-  case_eq (TS.mem [a, c, e] csq_orig); [intros; constructor; exact Hacc |].
+  case_eq (TS.mem [a, c, e] csq_orig); [auto|].
   intro Hace.
   apply Conseq_add.
   intros (x,(y,z)) Ht'.
@@ -245,9 +245,11 @@ Proof.
   intros a b c csq_orig csq_new (a',(b',e)) Habc Ht Hacc.
   unfold step5_aux.
   destruct (N2.eq_dec (a, b) (a', b')); [|constructor; exact Hacc].
-Admitted.
-
-
+  eapply SetProps.fold_rec_nodep; eauto.
+  intros.
+  compute in e0. destruct e0 as [ea eb]. subst.
+  apply step5_aux_aux_correct; auto.
+  eauto.
 Lemma step5_correct : step_correct step5.
 Proof.
   unfold step_correct, step5.
