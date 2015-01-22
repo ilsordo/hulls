@@ -274,7 +274,6 @@ Proof.
   intros; eapply SetProps.fold_rec_nodep; intros; eauto.
 Qed.
 
-
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
   Hint Resolve step1_correct step4_correct step5_correct fold_step_correct.
@@ -300,8 +299,13 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Imm : forall ts ts', Conseqs_imm ts ts' -> Conseqs ts ts'
   | Trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs_imm ts' ts'' -> Conseqs ts ts''.
 
-Theorem sat145_correct : forall ts fuel, Conseqs ts (sat145 ts fuel).
+Hint Constructors Conseqs.
+
+Theorem sat145_correct : forall fuel ts, Conseqs ts (sat145 ts fuel).
 Proof.
+  induction fuel; simpl.
+  - repeat constructor. auto.
+  - intro.
 
 Admitted.
 
