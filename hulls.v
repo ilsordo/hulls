@@ -260,27 +260,13 @@ Proof.
   + constructor 4 with b d; firstorder.
 Qed.
 
-Lemma conseqs_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
-    Conseqs_imm s1 k -> Conseqs_imm s2 k.
-Proof.
-Admitted.
-(*
-  intros.
-  induction H.
-  + econstructor 1. eauto using conseq_congr.
-  + econstructor 2; eauto.
-Qed.
-*)
-
 Lemma fold_step_correct :
   forall csq_new csq_orig step,
     Conseqs_imm csq_orig csq_new ->
     step_correct step ->
     Conseqs_imm csq_orig (TS.fold (step csq_orig) csq_orig csq_new).
 Proof.
-  Hint Resolve conseq_congr conseqs_congr.
-  intros; eapply SetProps.fold_rec_nodep; intros; eauto.
-Qed.
+Admitted.
 
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
@@ -298,4 +284,24 @@ Admitted.
 
 
 Definition inconsistent csq :=
-  TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end).
+  TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end) csq.
+
+Check inconsistent.
+
+Fixpoint refute_ (fuel : nat) (worklist : TS.t) (problem : TS.t) :=
+  match fuel with
+      | O => false
+      | S new_fuel =>
+        inconsistent problem ||
+                     let elt := TS.choose worklist in
+                     match elt with
+                         | None => false
+                         | Some([m,n,p]) =>
+                           let remaining_worklist := TS.remove [m,n,p] worklist in
+                           refute_ new_fuel remaining_worklist (TS.add [m,n,p] problem) &&
+                                  refute_ new_fuel remaining_worklist (TS.add [m,p,n] problem)
+                     end
+  end.
+
+Definition refute worklist problem :=
+  refute_ 1000 worklist problem.
