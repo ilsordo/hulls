@@ -278,6 +278,9 @@ Lemma union_csq_imm: forall old new,
   Conseqs_imm old new -> Conseqs_imm old (TS.union old new).
 Proof.  
   intros old new H x Hincl.
+  apply TS.union_spec in Hincl.
+  destruct Hincl; eauto.
+Qed.  
 
   
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
@@ -294,11 +297,9 @@ Proof.
     end.
     { repeat (eapply fold_step_correct); eauto. intro. intro. constructor 1. apply TS.empty_spec in H.
       contradiction. }
-    Print step_correct.
-admit.
+    eauto using union_csq_imm.
+Qed.
     
-Admitted.
-
 Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Imm : forall ts ts', Conseqs_imm ts ts' -> Conseqs ts ts'
   | Trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs_imm ts' ts'' -> Conseqs ts ts''.
