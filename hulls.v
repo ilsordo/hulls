@@ -378,16 +378,6 @@ Definition triplets_to_triangles :=
                      end
     )
 .
-
-(* 123 234 152 253 354 145 :
-             5
-            /|
-           / |
-          2--3
-         /   |
-        /    |
-       1     4
-*)
 Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [1,4,5]}}.
 Definition refute l := refute' (triplets_to_triangles (enumerate 3 5)) (sat145 l 1000).
 
