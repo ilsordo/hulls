@@ -326,14 +326,31 @@ Definition inconsistent csq :=
 
 Check inconsistent.
 
+Definition distinctb a b c :=
+  if eq_nat_dec a b
+  then false
+  else (if eq_nat_dec b c
+        then false
+        else (if eq_nat_dec c a
+             then false
+             else true)).
+
+Definition distinct (a b c : nat) := a ≠ b ∧ b ≠ c ∧ c ≠ a.
+Hint Unfold distinct.
+
+Lemma distinct_spec : forall a b c, distinctb a b c = true -> distinct a b c.
+Proof. intros. unfold distinctb in *. flatten H. unfold distinct. auto. Qed.
+
 Fixpoint refute' (worklist : list Triangle.t) (problem : TS.t) :=
   match worklist with
       | nil => false
       | [m,n,p]::wl =>
-        if inconsistent problem then true
-        else if negb (refute' wl (sat145 (TS.add [m,n,p] problem) 1000))
-             then false
-             else refute' wl (sat145 (TS.add [p,n,m] problem) 1000)
+        if distinctb m n p then
+          if inconsistent problem then true
+          else if negb (refute' wl (sat145 (TS.add [m,n,p] problem) 1000))
+               then false
+               else refute' wl (sat145 (TS.add [p,n,m] problem) 1000)
+        else refute' wl problem
   end.
 
 Fixpoint enumerate len n : list (list nat) :=
@@ -384,8 +401,8 @@ Section FINAL.
   Definition δ t := match t with [x, y, z] => oriented (inj x) (inj y) (inj z) end.
   Definition Δ := TS.For_all δ.
   Parameter rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
-  Parameter rule2 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] -> ¬δ [c, b, a].
-  Parameter rule3 : forall a b c, δ [a, b, c] ∨ δ [c, b, a].
+  Parameter rule2 : forall a b c, δ [a, b, c] -> ¬δ [c, b, a].
+  Parameter rule3 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] ∨ δ [c, b, a].
   Parameter rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
   Parameter rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
   Parameter hyps : TS.t.
@@ -405,9 +422,13 @@ Section FINAL.
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
   Admitted.
 
-  Lemma refute'_spec_axiom3: forall ts a b c,
+  Lemma refute'_spec_axiom3: forall ts a b c (DIST: distinct a b c),
       Δ ts -> ¬Δ (TS.add [a, b, c] ts) -> ¬Δ (TS.add [c, b, a] ts) -> False.
+  Proof.
+    intros. unfold distinct in *. destruct DIST as [Ha [Hb Hc]]. destruct (rule3 a b c); eauto using rule2; eauto.
+    
   Admitted.
+
     
   Lemma refute'_spec : forall wl ts, Δ ts -> refute' wl ts = true -> False.
   Proof.
@@ -416,10 +437,12 @@ Section FINAL.
     + destruct a as (x1, (x2, x3)). unfold refute' in H0.
       flatten H0.
       * eauto using inconsistent_spec.
-      * apply negb_false_iff in Eq0.
+      * apply negb_false_iff in Eq1.
         eapply refute'_spec_axiom3 with (ts := ts) (a := x1) (b := x2) (c := x3); eauto; intros.
-        - intro. eapply IHwl in Eq0; eauto. eapply sat145_spec; eauto. 
+        - eauto using distinct_spec.
+        - intro. eapply IHwl in Eq1; eauto. eapply sat145_spec; eauto. 
         - intro. eapply IHwl in H0; eauto. eapply sat145_spec; eauto.
+      * eauto.
   Qed.
 
           
