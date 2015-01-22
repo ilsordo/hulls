@@ -288,11 +288,6 @@ Proof.
       assert (Conseqs_imm orig x)
     end.
     { repeat (eapply fold_step_correct); eauto. intro. 
-
-
-    }
-    Print step_correct.
-
     
 Admitted.
 
@@ -311,20 +306,14 @@ Definition inconsistent csq :=
 
 Check inconsistent.
 
-Fixpoint refute_ (fuel : nat) (worklist : TS.t) (problem : TS.t) :=
-  match fuel with
-      | O => false
-      | S new_fuel =>
+Fixpoint refute (worklist : list Triangle.t) (problem : TS.t) :=
+  match worklist with
+      | nil => false
+      | [m,n,p]::remaining_worklist =>
         inconsistent problem ||
-                     let elt := TS.choose worklist in
-                     match elt with
-                         | None => false
-                         | Some([m,n,p]) =>
-                           let remaining_worklist := TS.remove [m,n,p] worklist in
-                           refute_ new_fuel remaining_worklist (TS.add [m,n,p] problem) &&
-                                  refute_ new_fuel remaining_worklist (TS.add [m,p,n] problem)
-                     end
+                     (refute remaining_worklist (TS.add [m,n,p] problem) &&
+                                  refute remaining_worklist (TS.add [m,p,n] problem))
   end.
 
-Definition refute worklist problem :=
-  refute_ 1000 worklist problem.
+(* Definition problem5 := {{[1,2,3], [1,3,2]}}.
+Compute refute ([1,3,2]::nil) problem5. *)
