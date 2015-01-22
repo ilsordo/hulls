@@ -135,7 +135,12 @@ Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Conseq_add : forall ts ts', (forall t, (TS.In t ts') -> Conseq ts t) -> Conseqs ts ts'
   | Conseq_trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
 
-Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), TS.In t csq_orig -> (forall t', TS.In t' csq_new -> Conseq csq_orig t') -> Conseqs csq_orig (step csq_orig t csq_new).
+Definition Imm_csq old new := forall x, TS.In x new -> Conseq old x.
+
+Definition step_correct step := forall csq_orig csq_new (t : Triangle.t), 
+    TS.In t csq_orig -> 
+    Imm_csq csq_orig csq_new ->
+    Imm_csq csq_orig (step csq_orig t csq_new).
 
 Hint Constructors Conseq Conseqs.
 
@@ -179,8 +184,6 @@ Proof.
     case_eq (TS.mem [a, b, n0] csq_orig); intro.
     + rewrite H4 in *; auto.
     + rewrite H4 in *.
-      apply SetFacts.add_iff in H3.
-      destruct H3.
 
 Admitted.
 
