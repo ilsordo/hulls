@@ -274,7 +274,12 @@ Proof.
   intros; eapply SetProps.fold_rec_nodep; intros; eauto.
 Qed.
 
+Lemma union_csq_imm: forall old new, 
+  Conseqs_imm old new -> Conseqs_imm old (TS.union old new).
+Proof.  
+  intros old new H x Hincl.
 
+  
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
   Hint Resolve step1_correct step4_correct step5_correct fold_step_correct.
@@ -287,12 +292,10 @@ Proof.
     | [ |- Conseqs_imm orig (TS.union orig ?x)] =>
       assert (Conseqs_imm orig x)
     end.
-    { repeat (eapply fold_step_correct); eauto. intro. 
-
-
-    }
+    { repeat (eapply fold_step_correct); eauto. intro. intro. constructor 1. apply TS.empty_spec in H.
+      contradiction. }
     Print step_correct.
-
+admit.
     
 Admitted.
 
