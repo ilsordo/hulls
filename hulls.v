@@ -398,6 +398,7 @@ Section FINAL.
   Parameter hyps : TS.t.
   Hypothesis hyps_spec : Δ hyps.
   Parameter ziel : Triangle.t.
+  Hypothesis ziel_not_degenerate : match ziel with [a, b, c] => distinct a b c end.
 
   Lemma Conseqs_imm_spec : forall ts ts', Conseqs_imm ts ts' -> Δ ts -> Δ ts'.
     intros.
@@ -430,13 +431,19 @@ Section FINAL.
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
   Admitted.
 
+  Lemma Δ_is_additive : forall ts t, δ t -> Δ ts -> Δ (TS.add t ts).
+  Proof.
+    intros ts t Ht Hts x Hx.
+    apply TS.add_spec in Hx; destruct Hx as [Heq | Hin];
+      [apply eq_is_eq in Heq; congruence | auto].
+  Qed.
+    
   Lemma refute'_spec_axiom3: forall ts a b c (DIST: distinct a b c),
       Δ ts -> ¬Δ (TS.add [a, b, c] ts) -> ¬Δ (TS.add [c, b, a] ts) -> False.
   Proof.
-    intros. unfold distinct in *. destruct DIST as [Ha [Hb Hc]]. destruct (rule3 a b c); eauto using rule2; eauto.
-    
-  Admitted.
-
+    intros. unfold distinct in *. destruct DIST as [Ha [Hb Hc]].
+    destruct (rule3 a b c); eauto using rule2, Δ_is_additive.
+  Qed.
     
   Lemma refute'_spec : forall wl ts, Δ ts -> refute' wl ts = true -> False.
   Proof.
@@ -461,10 +468,19 @@ Section FINAL.
     exact nil.
   Qed.    
 
-  Hypothesis refute_true : refute (TS.add ziel hyps) = true.
+  Definition sym_triangle (t : Triangle.t) :=
+    match t with
+      [a, b, c] => [c, b, a]
+    end.
+  
+  Hypothesis refute_true : refute (TS.add (sym_triangle ziel) hyps) = true.
 
-  Theorem cool : False.
+  Theorem cool : δ ziel.
   Proof.
-  Admitted.
+    destruct ziel as (a, (b, c)). destruct ziel_not_degenerate as [Ha [Hb Hc]].
+    destruct (rule3 a b c); eauto. exfalso. simpl in refute_true.
+    eapply refute_spec with (TS.add [c, b, a] hyps); eauto.
+    eauto using Δ_is_additive.
+  Qed.    
 
 End FINAL.
