@@ -337,7 +337,10 @@ Fixpoint refute (worklist : list Triangle.t) (problem : TS.t) :=
  
 Fixpoint enumerate len n : list (list nat) :=
   match n with
-      O => nil
+      O => match len with
+               | O => nil::nil
+               | S p => nil
+           end
     | S p =>
       match len with
         | O => nil::nil
@@ -358,8 +361,8 @@ Definition triplets_to_triangles :=
     )
 .
 
-(* abc ∧ abd ∧ abe ∧ bcd ∧ bec *)
-Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,5,3]}}.
-Compute refute (triplets_to_triangles (enumerate 3 6)) (sat145 canonical_problem 1000).
+(* abc ∧ abd ∧ abe ∧ bcd ∧ bce *)
+Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,3,5]}}.
+Compute refute (triplets_to_triangles (enumerate 3 5)) (sat145 canonical_problem 1000).
 
 Compute TS.elements (sat145 canonical_problem 1000).
