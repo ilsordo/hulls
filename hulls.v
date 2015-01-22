@@ -3,6 +3,8 @@ Require Import Structures.OrdersEx.
 Require Import Structures.Orders.
 Require Import MSetAVL.
 
+Require Import DLib.
+
 Require MSets.MSetFacts.
 Require Coq.MSets.MSetProperties.
 
@@ -139,6 +141,7 @@ Definition step_correct step := forall csq_orig csq_new (t : Triangle.t),
     Conseqs_imm csq_orig (step csq_orig t csq_new).
 
 Hint Constructors Conseq.
+Hint Unfold Conseqs_imm.
 
 Lemma step1_correct : step_correct step1.
 Proof.
@@ -219,20 +222,17 @@ Lemma step5_aux_aux_correct :
 Proof.
   intros a b c d csq_orig csq_new (a',(b',e)) Habc Habd Ht Hacc.
   unfold step5_aux_aux.
-  destruct (N2.eq_dec (a, b) (a', b')); [ |auto].
+  flatten; auto.
   compute in e0.
   destruct e0 as [ea eb].
   symmetry in ea,eb. subst.
-  case_eq (TS.mem [a, c, d] csq_orig && TS.mem [a, d, e] csq_orig); [ |auto].
-  intro eq.
   unfold insert.
-  case_eq (TS.mem [a, c, e] csq_orig); [auto|].
-  intro Hace.
+  flatten; auto.
   unfold Conseqs_imm.
   intros (x,(y,z)) Ht'.
   destruct (Triangle.eq_dec [x, y, z] [a, c, e]).
   + compute in e0. destruct e0 as [ea e0]. destruct e0 as [ec ee]. subst.
-    apply andb_prop in eq. destruct eq as [Hmem1 Hmem2].
+    apply andb_prop in Eq. destruct Eq as [Hmem1 Hmem2].
     apply SetFacts.mem_2 in Hmem1. apply SetFacts.mem_2 in Hmem2.
     apply (Rule5 csq_orig a b c d e); try assumption.
   + apply Hacc. apply SetFacts.add_3 with (x := [a, c, e]).
@@ -250,7 +250,7 @@ Lemma step5_aux_correct :
 Proof.
   intros a b c csq_orig csq_new (a',(b',e)) Habc Ht Hacc.
   unfold step5_aux.
-  destruct (N2.eq_dec (a, b) (a', b')); [|auto].
+  flatten; auto.
   eapply SetProps.fold_rec_nodep; eauto.
   intros.
   compute in e0. destruct e0 as [ea eb]. subst.
@@ -278,13 +278,15 @@ Lemma union_csq_imm: forall old new,
   Conseqs_imm old new -> Conseqs_imm old (TS.union old new).
 Proof.  
   intros old new H x Hincl.
+  apply TS.union_spec in Hincl.
+  destruct Hincl; eauto.
+Qed.  
 
   
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
   Hint Resolve step1_correct step4_correct step5_correct fold_step_correct.
-  Require Import DLib.
-  intros orig. destruct (step145 orig) eqn:eq. 
+  intros orig. destruct (step145 orig) eqn:eq.
   + intro. simpl in *. unfold step145 in eq. flatten eq.
     apply TS.is_empty_spec in Eq. apply SetProps.empty_is_empty_1 in Eq. eauto.
   + simpl in *. unfold step145 in *. flatten eq.
@@ -294,24 +296,29 @@ Proof.
     end.
     { repeat (eapply fold_step_correct); eauto. intro. intro. constructor 1. apply TS.empty_spec in H.
       contradiction. }
-    Print step_correct.
-admit.
+    eauto using union_csq_imm.
+Qed.
     
-Admitted.
-
 Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Imm : forall ts ts', Conseqs_imm ts ts' -> Conseqs ts ts'
-  | Trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs_imm ts' ts'' -> Conseqs ts ts''.
+  | Trans : forall ts ts' ts'', Conseqs_imm ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
 
 Hint Constructors Conseqs.
 
+Lemma step145_effective_correct : forall ts csq, inr csq = step145 ts -> Conseqs_imm ts csq.
+Proof.
+  Hint Resolve step145_correct.
+  intros. replace csq with (csq_proj (inr csq)) by auto.
+  rewrite H. auto.
+Qed.
+
 Theorem sat145_correct : forall fuel ts, Conseqs ts (sat145 ts fuel).
 Proof.
-  induction fuel; simpl.
-  - repeat constructor. auto.
-  - intro.
-
-Admitted.
+  induction fuel; simpl; auto.
+  intro. flatten. unfold step145 in Eq; flatten Eq; auto.
+  eapply Trans; [| eauto].
+  eapply step145_effective_correct; auto.
+Qed.
 
 
 Definition inconsistent csq :=
