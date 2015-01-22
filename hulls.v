@@ -362,10 +362,17 @@ Definition triplets_to_triangles :=
     )
 .
 
-(* abc ∧ abd ∧ abe ∧ bcd ∧ bce *)
-Definition support (l: TS.t) := 6.
-Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,3,5]}}.
-Definition refute l := refute' (triplets_to_triangles (enumerate 3 (support l))) (sat145 l 1000).
+(* 123 234 152 253 354 145 :
+             5
+            /|
+           / |
+          2--3
+         /   |
+        /    |
+       1     4 
+*)
+Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [1,4,5]}}.
+Definition refute l := refute' (triplets_to_triangles (enumerate 3 5)) (sat145 l 1000).
 
 Notation "x ∈ y" := (TS.In x y ) (at level 10).
 
