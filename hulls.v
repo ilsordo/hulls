@@ -39,6 +39,7 @@ Definition step1 csq_orig t csq_new :=
   end.
 
 Definition step4_aux a b d csq_orig t csq_new :=
+  (* abd /\ bcd /\ cad -> abc *)
   match t with
       [b',c,d'] =>
       if N2.eq_dec (b,d) (b',d') then
@@ -185,13 +186,20 @@ Admitted.
 
 Lemma step4_correct : step_correct step4.
 Proof.
-  unfold step_correct; intros.
-  apply Conseq_add.
+  unfold step_correct.
+  intros csq_orig csq_new (a, (b, c)).
+  unfold step4.
   intros.
+  eapply SetProps.fold_rec_nodep.
+  + auto.
+  + intros.
+    eapply step4_aux_correct; eauto.
+    intros.
+    
   destruct t; destruct p.
   destruct t0; destruct p.
   simpl in H1.
-Admitted.
+  
 
 Lemma step5_aux_aux_correct :
   forall a b c d csq_orig csq_new t,
@@ -234,7 +242,7 @@ Proof.
   intros a b c csq_orig csq_new (a',(b',e)) Habc Ht Hacc.
   unfold step5_aux.
   destruct (N2.eq_dec (a, b) (a', b')); [|constructor; exact Hacc].
-  apply SetProps.fold_rec with .
+Admitted.
 
 
 Lemma step5_correct : step_correct step5.
