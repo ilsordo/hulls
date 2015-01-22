@@ -211,8 +211,6 @@ Lemma step5_aux_aux_correct :
     Conseqs_imm csq_orig csq_new ->
     Conseqs_imm csq_orig (step5_aux_aux a b c d csq_orig t csq_new).
 Proof.
-Admitted.
-(*
   intros a b c d csq_orig csq_new (a',(b',e)) Habc Habd Ht Hacc.
   unfold step5_aux_aux.
   destruct (N2.eq_dec (a, b) (a', b')); [ |auto].
@@ -224,7 +222,7 @@ Admitted.
   unfold insert.
   case_eq (TS.mem [a, c, e] csq_orig); [auto|].
   intro Hace.
-  apply Conseq_add.
+  unfold Conseqs_imm.
   intros (x,(y,z)) Ht'.
   destruct (Triangle.eq_dec [x, y, z] [a, c, e]).
   + compute in e0. destruct e0 as [ea e0]. destruct e0 as [ec ee]. subst.
@@ -235,7 +233,7 @@ Admitted.
     * compute. compute in n. intuition.
     * exact Ht'.
 Qed.
-*)
+
 
 Lemma step5_aux_correct :
   forall a b c csq_orig csq_new t,
@@ -244,28 +242,22 @@ Lemma step5_aux_correct :
     Conseqs_imm csq_orig csq_new ->
     Conseqs_imm csq_orig (step5_aux a b c csq_orig t csq_new).
 Proof.
-Admitted.
-(*
   intros a b c csq_orig csq_new (a',(b',e)) Habc Ht Hacc.
   unfold step5_aux.
-  destruct (N2.eq_dec (a, b) (a', b')); [|constructor; exact Hacc].
+  destruct (N2.eq_dec (a, b) (a', b')); [|auto].
   eapply SetProps.fold_rec_nodep; eauto.
   intros.
   compute in e0. destruct e0 as [ea eb]. subst.
   apply step5_aux_aux_correct; auto.
-  eauto.
-*)
+Qed.
 
 Lemma step5_correct : step_correct step5.
 Proof.
-Admitted.
-(*
   unfold step_correct, step5.
   intros csq_orig csq_new (a,(b,c)) T_in_csq Hrec.
-  constructor.
-  intros (a',(b',c')).
-  intro.
-*)
+  eapply SetProps.fold_rec_nodep; eauto.
+  intros. apply step5_aux_correct; auto.
+Qed.
 
 Lemma conseq_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
     Conseq s1 k -> Conseq s2 k.
