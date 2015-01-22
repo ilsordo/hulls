@@ -369,7 +369,7 @@ Definition triplets_to_triangles :=
           2--3
          /   |
         /    |
-       1     4 
+       1     4
 *)
 Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [1,4,5]}}.
 Definition refute l := refute' (triplets_to_triangles (enumerate 3 5)) (sat145 l 1000).
@@ -392,8 +392,26 @@ Section FINAL.
   Hypothesis hyps_spec : Δ hyps.
   Parameter ziel : Triangle.t.
 
+  Lemma Conseqs_imm_spec : forall ts ts', Conseqs_imm ts ts' -> Δ ts -> Δ ts'.
+    intros.
+    intro.
+    intro.
+    assert (Conseq ts x).
+    intuition.
+    induction H2.
+    + intuition.
+    + apply rule1; intuition.
+    + apply rule4 with d; intuition.
+    + apply rule5 with b d; intuition.
+  Qed.
+
   Lemma Conseqs_spec : forall ts ts', Conseqs ts ts' -> Δ ts -> Δ ts'.
-  Admitted.
+    intros.
+    induction H.
+    * apply (Conseqs_imm_spec ts ts'); assumption.
+    * apply IHConseqs.
+      apply (Conseqs_imm_spec ts ts'); assumption.
+  Qed.
 
   Lemma sat145_spec : forall ts fuel, Δ ts -> Δ (sat145 ts fuel).
   Admitted.
