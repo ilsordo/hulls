@@ -142,13 +142,11 @@ Hint Constructors Conseq.
 
 Lemma step1_correct : step_correct step1.
 Proof.
-Admitted.
-(*
   unfold step_correct.
   intros.
   destruct t; destruct p.
   simpl.
-  apply Conseq_add.
+  unfold Conseqs_imm.
   intros.
   destruct t; destruct p.
   unfold insert in H1.
@@ -162,7 +160,6 @@ Admitted.
       intuition.
     + apply H0; auto.
 Qed.
-*)
 
 Lemma step4_aux_correct :
   forall a b c csq_orig t csq_new,
