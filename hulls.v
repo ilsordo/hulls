@@ -367,6 +367,8 @@ Definition support (l: TS.t) := 6.
 Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,3,5]}}.
 Definition refute l := refute' (triplets_to_triangles (enumerate 3 (support l))) (sat145 l 1000).
 
+Notation "x ∈ y" := (TS.In x y ) (at level 10).
+
 Section FINAL.
 Parameter A : Type.
 Parameter oriented : A -> A -> A -> Prop.
@@ -379,6 +381,7 @@ Parameter rule3 : forall a b c, δ [a, b, c] ∨ δ [c, b, a].
 Parameter rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
 Parameter rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
 Parameter hyps : TS.t.
+Hypothesis hyps_spec : forall x, x ∈ hyps -> δ x.
 Parameter ziel : Triangle.t.
 
 Hypothesis refute_true : refute (TS.add ziel hyps) = true.
