@@ -333,7 +333,7 @@ Fixpoint refute' (worklist : list Triangle.t) (problem : TS.t) :=
         if inconsistent problem then true
         else if negb (refute' wl (sat145 (TS.add [m,n,p] problem) 1000))
              then false
-             else refute' wl (sat145 (TS.add [m,p,n] problem) 1000)
+             else refute' wl (sat145 (TS.add [p,n,m] problem) 1000)
   end.
 
 Fixpoint enumerate len n : list (list nat) :=
@@ -414,13 +414,39 @@ Section FINAL.
   Qed.
 
   Lemma sat145_spec : forall ts fuel, Δ ts -> Δ (sat145 ts fuel).
-  Admitted.
+    Proof.
+      intro. intro.
+      assert (Conseqs ts (sat145 ts fuel)) by (apply sat145_correct).
+      intro; apply (Conseqs_spec ts (sat145 ts fuel)); repeat assumption.
+    Qed.
 
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
   Admitted.
 
-  Lemma refute_spec : forall ts, Δ ts -> refute ts = true -> False.
+  Lemma refute'_spec_axiom3: forall ts a b c,
+      Δ ts -> ¬Δ (TS.add [a, b, c] ts) -> ¬Δ (TS.add [c, b, a] ts) -> False.
   Admitted.
+    
+  Lemma refute'_spec : forall wl ts, Δ ts -> refute' wl ts = true -> False.
+  Proof.
+    intro. induction wl; intros. 
+    + simpl in *. discriminate.
+    + destruct a as (x1, (x2, x3)). unfold refute' in H0.
+      flatten H0.
+      * eauto using inconsistent_spec.
+      * apply negb_false_iff in Eq0.
+        eapply refute'_spec_axiom3 with (ts := ts) (a := x1) (b := x2) (c := x3); eauto; intros.
+        - intro. eapply IHwl in Eq0; eauto. eapply sat145_spec; eauto. 
+        - intro. eapply IHwl in H0; eauto. eapply sat145_spec; eauto.
+  Qed.
+
+          
+  Lemma refute_spec : forall ts, Δ ts -> refute ts = true -> False.
+  Proof.
+    intros. unfold refute in *. eauto using refute'_spec, sat145_spec.
+    Grab Existential Variables.
+    exact nil.
+  Qed.    
 
   Hypothesis refute_true : refute (TS.add ziel hyps) = true.
 
