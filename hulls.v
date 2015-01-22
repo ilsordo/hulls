@@ -326,14 +326,14 @@ Definition inconsistent csq :=
 
 Check inconsistent.
 
-Fixpoint refute (worklist : list Triangle.t) (problem : TS.t) :=
+Fixpoint refute' (worklist : list Triangle.t) (problem : TS.t) :=
   match worklist with
       | nil => false
       | [m,n,p]::wl =>
         if inconsistent problem then true
-        else if negb (refute wl (sat145 (TS.add [m,n,p] problem) 1000))
+        else if negb (refute' wl (sat145 (TS.add [m,n,p] problem) 1000))
              then false
-             else refute wl (sat145 (TS.add [m,p,n] problem) 1000)
+             else refute' wl (sat145 (TS.add [m,p,n] problem) 1000)
   end.
  
 Fixpoint enumerate len n : list (list nat) :=
@@ -362,6 +362,31 @@ Definition triplets_to_triangles :=
     )
 .
 
+
+
 (* abc ∧ abd ∧ abe ∧ bcd ∧ bce *)
+Definition support (l: TS.t) := 6.
 Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,3,5]}}.
-Compute refute (triplets_to_triangles (enumerate 3 6)) (sat145 canonical_problem 1000).
+Definition refute l := refute' (triplets_to_triangles (enumerate 3 (support l))) (sat145 l 1000).
+
+Section FINAL.
+Parameter A : Type.
+Parameter oriented : A -> A -> A -> Prop.
+Parameter inj : nat -> A.
+Parameter inj_inj : ∀ x y, inj x = inj y -> x = y.
+Definition δ t := match t with [x, y, z] => oriented (inj x) (inj y) (inj z) end.
+Parameter rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
+Parameter rule2 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] -> ¬δ [c, b, a].
+Parameter rule3 : forall a b c, δ [a, b, c] ∨ δ [c, b, a].
+Parameter rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
+Parameter rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
+Parameter hyps : TS.t.
+Parameter ziel : Triangle.t.
+
+Hypothesis refute_true : refute (TS.add ziel hyps) = true.
+
+Theorem cool : False.
+Proof.
+Admitted.  
+
+End FINAL.
