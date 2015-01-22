@@ -322,9 +322,7 @@ Qed.
 
 
 Definition inconsistent csq :=
-  TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end) csq.
-
-Check inconsistent.
+  TS.exists_ (fun t => match t with [a,b,c] => TS.mem [c, b, a] csq end) csq.
 
 Definition distinctb a b c :=
   if eq_nat_dec a b
@@ -429,8 +427,14 @@ Section FINAL.
     Qed.
 
   Lemma inconsistent_spec : forall ts, Δ ts -> inconsistent ts = true -> False.
-  Admitted.
-
+  Proof.
+    intros ts Hts H. unfold inconsistent in *.
+    apply TS.exists_spec in H.
+    + destruct H as [[a [b c]] [Hx Hmem]]. apply TS.mem_spec in Hmem. eapply rule2; eauto.
+    + intros x y Heq.
+      apply eq_is_eq in Heq. subst. exact eq_refl.
+  Qed.
+      
   Lemma Δ_is_additive : forall ts t, δ t -> Δ ts -> Δ (TS.add t ts).
   Proof.
     intros ts t Ht Hts x Hx.
