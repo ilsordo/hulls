@@ -274,15 +274,15 @@ Proof.
   intros; eapply SetProps.fold_rec_nodep; intros; eauto.
 Qed.
 
-Lemma union_csq_imm: forall old new, 
+Lemma union_csq_imm: forall old new,
   Conseqs_imm old new -> Conseqs_imm old (TS.union old new).
-Proof.  
+Proof.
   intros old new H x Hincl.
   apply TS.union_spec in Hincl.
   destruct Hincl; eauto.
-Qed.  
+Qed.
 
-  
+
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
   Hint Resolve step1_correct step4_correct step5_correct fold_step_correct.
@@ -298,7 +298,7 @@ Proof.
       contradiction. }
     eauto using union_csq_imm.
 Qed.
-    
+
 Inductive Conseqs : TS.t -> TS.t -> Prop :=
   | Imm : forall ts ts', Conseqs_imm ts ts' -> Conseqs ts ts'
   | Trans : forall ts ts' ts'', Conseqs_imm ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
@@ -335,7 +335,7 @@ Fixpoint refute (worklist : list Triangle.t) (problem : TS.t) :=
              then false
              else refute wl (sat145 (TS.add [m,p,n] problem) 1000)
   end.
- 
+
 Fixpoint enumerate len n : list (list nat) :=
   match n with
       O => match len with
@@ -362,6 +362,13 @@ Definition triplets_to_triangles :=
     )
 .
 
-(* abc ∧ abd ∧ abe ∧ bcd ∧ bce *)
-Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,3,5]}}.
+(* 123 234 152 253 354 145 *)
+Definition problem1 := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [3,5,4], [1,4,5]}}.
+
+Compute refute (triplets_to_triangles (enumerate 3 6)) (sat145 problem1 1000).
+
+(* abc ∧ abd ∧ abe ∧ bcd ∧ bec *)
+Definition canonical_problem := {{[1,2,3], [1,2,4], [1,2,5], [2,3,4], [2,5,3]}}.
 Compute refute (triplets_to_triangles (enumerate 3 6)) (sat145 canonical_problem 1000).
+
+Compute TS.elements (sat145 canonical_problem 1000).
