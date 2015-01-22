@@ -105,7 +105,7 @@ Definition step145 csq_orig :=
   let csq_new := TS.fold (step1 csq_orig) csq_orig TS.empty in
   let csq_new' := TS.fold (step4 csq_orig) csq_orig csq_new in
   let csq_new'' := TS.fold (step5 csq_orig) csq_orig csq_new' in
-  if TS.is_empty csq_new then
+  if TS.is_empty csq_new'' then
     inl csq_orig
   else
     inr (TS.union csq_orig csq_new).
@@ -168,21 +168,34 @@ Lemma step4_aux_correct :
     Conseqs_imm csq_orig csq_new ->
     Conseqs_imm csq_orig (step4_aux a b c csq_orig t csq_new).
 Proof.
-Admitted.
-(*
   intros.
   destruct t; destruct p.
   unfold step4_aux.
+  unfold Conseqs_imm.
+  intros.
   destruct (N2.eq_dec (b, c) (n, n1)).
-  constructor.
-  case_eq (TS.mem [n0, a, c] csq_orig).
-  - intros; simpl.
-    apply H1.
-    unfold insert in H3.
-    case_eq (TS.mem [a, b, n0] csq_orig); intro.
-    + rewrite H4 in *; auto.
-    + rewrite H4 in *.
-*)
+  - case_eq (TS.mem [n0, a, c] csq_orig).
+    + intros.
+      rewrite H3 in H2.
+      unfold insert in H2.
+      case_eq (TS.mem [a, b, n0] csq_orig); intro.
+      * rewrite H4 in *; auto.
+      * rewrite H4 in *.
+        unfold Conseqs_imm in H1.
+        destruct t; destruct p.
+        compute in e; intuition; subst.
+        destruct (Triangle.eq_dec [a,n,n0] [n2,n3,n4]).
+        { compute in e.
+          intuition; subst.
+          apply (Rule4 csq_orig n2 n3 n4 n1); repeat (intuition).
+        }
+        apply (SetFacts.add_neq_iff csq_new) in n5.
+        intuition.
+    + intros.
+      rewrite H3 in H2.
+      intuition.
+  - intuition.
+Qed.
 
 Lemma step4_correct : step_correct step4.
 Proof.
@@ -252,25 +265,25 @@ Proof.
   intros. apply step5_aux_correct; auto.
 Qed.
 
-Lemma conseq_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
-    Conseq s1 k -> Conseq s2 k.
-Proof.
-  intros. unfold TS.Equal in EQ. induction H; firstorder.
-  + constructor 3 with d; firstorder.
-  + constructor 4 with b d; firstorder.
-Qed.
-
 Lemma fold_step_correct :
   forall csq_new csq_orig step,
     Conseqs_imm csq_orig csq_new ->
     step_correct step ->
     Conseqs_imm csq_orig (TS.fold (step csq_orig) csq_orig csq_new).
 Proof.
-Admitted.
+  intros; eapply SetProps.fold_rec_nodep; intros; eauto.
+Qed.
 
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
+  Require Import DLib.
+  intros ts t H. destruct (step145 ts) eqn:eq. 
+  + simpl in *. unfold step145 in eq. flatten eq.
+    apply TS.is_empty_spec in Eq. apply SetProps.empty_is_empty_1 in Eq. eauto.
+  + simpl in *. unfold step145 in *. flatten eq.
+    constructor. 
 
+    
 Admitted.
 
 Inductive Conseqs : TS.t -> TS.t -> Prop :=
