@@ -131,21 +131,19 @@ Inductive Conseq : TS.t -> Triangle.t -> Prop :=
   | Rule4 : forall ts a b c d, TS.In [a,b,d] ts -> TS.In [b,c,d] ts -> TS.In [c,a,d] ts -> Conseq ts [a,b,c]
   | Rule5 : forall ts a b c d e, TS.In [a,b,c] ts -> TS.In [a,b,d] ts -> TS.In [a,b,e] ts -> TS.In [a,c,d] ts -> TS.In [a,d,e] ts -> Conseq ts [a,c,e].
 
-Inductive Conseqs : TS.t -> TS.t -> Prop :=
-  | Conseq_add : forall ts ts', (forall t, (TS.In t ts') -> Conseq ts t) -> Conseqs ts ts'
-  | Conseq_trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs ts' ts'' -> Conseqs ts ts''.
-
-Definition Imm_csq old new := forall x, TS.In x new -> Conseq old x.
+Definition Conseqs_imm ts ts' := (forall t, (TS.In t ts') -> Conseq ts t).
 
 Definition step_correct step := forall csq_orig csq_new (t : Triangle.t),
     TS.In t csq_orig ->
-    Imm_csq csq_orig csq_new ->
-    Imm_csq csq_orig (step csq_orig t csq_new).
+    Conseqs_imm csq_orig csq_new ->
+    Conseqs_imm csq_orig (step csq_orig t csq_new).
 
-Hint Constructors Conseq Conseqs.
+Hint Constructors Conseq.
 
 Lemma step1_correct : step_correct step1.
 Proof.
+Admitted.
+(*
   unfold step_correct.
   intros.
   destruct t; destruct p.
@@ -164,14 +162,17 @@ Proof.
       intuition.
     + apply H0; auto.
 Qed.
+*)
 
 Lemma step4_aux_correct :
   forall a b c csq_orig t csq_new,
     TS.In [a,b,c] csq_orig ->
     TS.In t csq_orig ->
-    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
-    Conseqs csq_orig (step4_aux a b c csq_orig t csq_new).
+    Conseqs_imm csq_orig csq_new ->
+    Conseqs_imm csq_orig (step4_aux a b c csq_orig t csq_new).
 Proof.
+Admitted.
+(*
   intros.
   destruct t; destruct p.
   unfold step4_aux.
@@ -184,11 +185,12 @@ Proof.
     case_eq (TS.mem [a, b, n0] csq_orig); intro.
     + rewrite H4 in *; auto.
     + rewrite H4 in *.
-
-Admitted.
+*)
 
 Lemma step4_correct : step_correct step4.
 Proof.
+Admitted.
+(*
   unfold step_correct.
   intros csq_orig csq_new (a, (b, c)).
   unfold step4.
@@ -198,20 +200,22 @@ Proof.
   + intros.
     eapply step4_aux_correct; eauto.
     intros.
-    
+
   destruct t; destruct p.
   destruct t0; destruct p.
   simpl in H1.
-  
+*)
 
 Lemma step5_aux_aux_correct :
   forall a b c d csq_orig csq_new t,
     TS.In [a,b,c] csq_orig ->
     TS.In [a,b,d] csq_orig ->
     TS.In t csq_orig ->
-    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
-    Conseqs csq_orig (step5_aux_aux a b c d csq_orig t csq_new).
+    Conseqs_imm csq_orig csq_new ->
+    Conseqs_imm csq_orig (step5_aux_aux a b c d csq_orig t csq_new).
 Proof.
+Admitted.
+(*
   intros a b c d csq_orig csq_new (a',(b',e)) Habc Habd Ht Hacc.
   unfold step5_aux_aux.
   destruct (N2.eq_dec (a, b) (a', b')); [ |auto].
@@ -234,14 +238,17 @@ Proof.
     * compute. compute in n. intuition.
     * exact Ht'.
 Qed.
+*)
 
 Lemma step5_aux_correct :
   forall a b c csq_orig csq_new t,
     TS.In [a,b,c] csq_orig ->
     TS.In t csq_orig ->
-    (forall t, TS.In t csq_new -> Conseq csq_orig t) ->
-    Conseqs csq_orig (step5_aux a b c csq_orig t csq_new).
+    Conseqs_imm csq_orig csq_new ->
+    Conseqs_imm csq_orig (step5_aux a b c csq_orig t csq_new).
 Proof.
+Admitted.
+(*
   intros a b c csq_orig csq_new (a',(b',e)) Habc Ht Hacc.
   unfold step5_aux.
   destruct (N2.eq_dec (a, b) (a', b')); [|constructor; exact Hacc].
@@ -250,13 +257,18 @@ Proof.
   compute in e0. destruct e0 as [ea eb]. subst.
   apply step5_aux_aux_correct; auto.
   eauto.
+*)
+
 Lemma step5_correct : step_correct step5.
 Proof.
+Admitted.
+(*
   unfold step_correct, step5.
   intros csq_orig csq_new (a,(b,c)) T_in_csq Hrec.
   constructor.
   intros (a',(b',c')).
   intro.
+*)
 
 Lemma conseq_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
     Conseq s1 k -> Conseq s2 k.
@@ -267,31 +279,35 @@ Proof.
 Qed.
 
 Lemma conseqs_congr: forall s1 s2 k (EQ: TS.Equal s1 s2),
-    Conseqs s1 k -> Conseqs s2 k.
+    Conseqs_imm s1 k -> Conseqs_imm s2 k.
 Proof.
+Admitted.
+(*
   intros.
   induction H.
   + econstructor 1. eauto using conseq_congr.
   + econstructor 2; eauto.
 Qed.
-
+*)
 
 Lemma fold_step_correct :
   forall csq_new csq_orig step,
-    Conseqs csq_orig csq_new ->
+    Conseqs_imm csq_orig csq_new ->
     step_correct step ->
-    Conseqs csq_orig (TS.fold (step csq_orig) csq_orig csq_new).
+    Conseqs_imm csq_orig (TS.fold (step csq_orig) csq_orig csq_new).
 Proof.
   Hint Resolve conseq_congr conseqs_congr.
   intros; eapply SetProps.fold_rec_nodep; intros; eauto.
 Qed.
 
-Admitted.
-
-Lemma step145_correct : forall ts t, Conseqs ts (csq_proj (step145 ts)).
+Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
 
 Admitted.
+
+Inductive Conseqs : TS.t -> TS.t -> Prop :=
+  | Imm : forall ts ts', Conseqs_imm ts ts' -> Conseqs ts ts'
+  | Trans : forall ts ts' ts'', Conseqs ts ts' -> Conseqs_imm ts' ts'' -> Conseqs ts ts''.
 
 Theorem sat145_correct : forall ts fuel, Conseqs ts (sat145 ts fuel).
 Proof.
@@ -301,3 +317,4 @@ Admitted.
 
 Definition inconsistent csq :=
   TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end).
+
