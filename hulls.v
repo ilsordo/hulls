@@ -307,4 +307,24 @@ Admitted.
 
 
 Definition inconsistent csq :=
-  TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end).
+  TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end) csq.
+
+Check inconsistent.
+
+Fixpoint refute_ (fuel : nat) (worklist : TS.t) (problem : TS.t) :=
+  match fuel with
+      | O => false
+      | S new_fuel =>
+        inconsistent problem ||
+                     let elt := TS.choose worklist in
+                     match elt with
+                         | None => false
+                         | Some([m,n,p]) =>
+                           let remaining_worklist := TS.remove [m,n,p] worklist in
+                           refute_ new_fuel remaining_worklist (TS.add [m,n,p] problem) &&
+                                  refute_ new_fuel remaining_worklist (TS.add [m,p,n] problem)
+                     end
+  end.
+
+Definition refute worklist problem :=
+  refute_ 1000 worklist problem.
