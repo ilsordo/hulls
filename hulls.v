@@ -333,7 +333,7 @@ Fixpoint refute' (worklist : list Triangle.t) (problem : TS.t) :=
         if inconsistent problem then true
         else if negb (refute' wl (sat145 (TS.add [m,n,p] problem) 1000))
              then false
-             else refute' wl (sat145 (TS.add [m,p,n] problem) 1000)
+             else refute' wl (sat145 (TS.add [p,n,m] problem) 1000)
   end.
 
 Fixpoint enumerate len n : list (list nat) :=
@@ -406,7 +406,7 @@ Section FINAL.
   Admitted.
 
   Lemma refute'_spec_axiom3: forall ts a b c,
-      Δ ts -> ¬Δ (TS.add [a, b, c] ts) -> ¬Δ (TS.add [a, c, b] ts) -> False.
+      Δ ts -> ¬Δ (TS.add [a, b, c] ts) -> ¬Δ (TS.add [c, b, a] ts) -> False.
   Admitted.
     
   Lemma refute'_spec : forall wl ts, Δ ts -> refute' wl ts = true -> False.
