@@ -108,7 +108,7 @@ Definition step145 csq_orig :=
   if TS.is_empty csq_new'' then
     inl csq_orig
   else
-    inr (TS.union csq_orig csq_new).
+    inr (TS.union csq_orig csq_new'').
 
 Definition csq_proj (r : TS.t + TS.t) := match r with
                            | inl csq => csq
@@ -274,14 +274,24 @@ Proof.
   intros; eapply SetProps.fold_rec_nodep; intros; eauto.
 Qed.
 
+
 Lemma step145_correct : forall ts, Conseqs_imm ts (csq_proj (step145 ts)).
 Proof.
+  Hint Resolve step1_correct step4_correct step5_correct.
   Require Import DLib.
-  intros ts t H. destruct (step145 ts) eqn:eq. 
-  + simpl in *. unfold step145 in eq. flatten eq.
+  intros orig. destruct (step145 orig) eqn:eq. 
+  + intro. simpl in *. unfold step145 in eq. flatten eq.
     apply TS.is_empty_spec in Eq. apply SetProps.empty_is_empty_1 in Eq. eauto.
   + simpl in *. unfold step145 in *. flatten eq.
-    constructor. 
+    match goal with
+    | [ |- Conseqs_imm orig (TS.union orig ?x)] =>
+      assert (Conseqs_imm orig x)
+    end.
+    { 
+
+
+    }
+    Print step_correct.
 
     
 Admitted.
