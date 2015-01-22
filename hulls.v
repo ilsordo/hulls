@@ -189,8 +189,6 @@ Admitted.
 
 Lemma step4_correct : step_correct step4.
 Proof.
-Admitted.
-(*
   unfold step_correct.
   intros csq_orig csq_new (a, (b, c)).
   unfold step4.
@@ -199,12 +197,7 @@ Admitted.
   + auto.
   + intros.
     eapply step4_aux_correct; eauto.
-    intros.
-
-  destruct t; destruct p.
-  destruct t0; destruct p.
-  simpl in H1.
-*)
+Qed.
 
 Lemma step5_aux_aux_correct :
   forall a b c d csq_orig csq_new t,
@@ -317,4 +310,3 @@ Admitted.
 
 Definition inconsistent csq :=
   TS.exists_ (fun t => match t with [a,b,c] => TS.mem [a,c,b] csq end).
-
