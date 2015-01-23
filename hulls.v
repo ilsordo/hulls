@@ -374,8 +374,15 @@ Definition triplets_to_triangles :=
                        | a::b::c::nil => [a,b,c]
                        | _ => [1,1,1]
                      end
-    )
-.(* 123 234 152 253 354 145 :
+    ).
+
+Definition max_triangle t := match t with [a,b,c] => max (max a b) c end.
+Definition support ts := TS.fold (fun t => fun m => max m (max_triangle t)) ts 0. 
+
+Definition refute l := refute' (triplets_to_triangles (enumerate 3 (support l))) (sat145 l 1000).
+
+Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [4,3,5], [1,4,5]}}.
+(* 123 234 152 253 354 145 :
              5
             /|
            / |
@@ -384,10 +391,7 @@ Definition triplets_to_triangles :=
         /    |
        1     4 
 *)
-Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [4,3,5], [1,4,5]}}.
-(* TODO: Compute the support of the problem to know the argument we give to enumerate *)
-Definition refute l := refute' (triplets_to_triangles (enumerate 3 5)) (sat145 l 1000).
-Compute refute canonical_problem.
+(* Compute (refute canonical_problem). *)
 
 Notation "x ∈ y" := (TS.In x y ) (at level 10).
 
