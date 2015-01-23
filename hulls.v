@@ -375,9 +375,19 @@ Definition triplets_to_triangles :=
                        | _ => [1,1,1]
                      end
     )
-.
-Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [1,4,5]}}.
+.(* 123 234 152 253 354 145 :
+             5
+            /|
+           / |
+          2--3
+         /   |
+        /    |
+       1     4 
+*)
+Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [4,3,5], [1,4,5]}}.
+(* TODO: Compute the support of the problem to know the argument we give to enumerate *)
 Definition refute l := refute' (triplets_to_triangles (enumerate 3 5)) (sat145 l 1000).
+Compute refute canonical_problem.
 
 Notation "x ∈ y" := (TS.In x y ) (at level 10).
 
@@ -471,7 +481,7 @@ Section FINAL.
   Proof.
     destruct ziel as (a, (b, c)). destruct ziel_not_degenerate as [Ha [Hb Hc]].
     destruct (rule3 a b c); eauto. exfalso. simpl in refute_true.
-    eapply refute_spec with (TS.add [c, b, a] hyps); eauto.
+    eapply refute_spec. with (TS.add [c, b, a] hyps). eauto.
     eauto using Δ_is_additive.
   Qed.    
 
