@@ -391,25 +391,26 @@ Definition canonical_problem := {{[1,2,3], [2,3,4], [1,5,2], [2,5,3], [4,3,5], [
         /    |
        1     4 
 *)
-(* Compute (refute canonical_problem). *)
+Compute (refute canonical_problem).
+
 
 Notation "x ∈ y" := (TS.In x y ) (at level 10).
 
 Section FINAL.
-  Parameter A : Type.
-  Parameter oriented : A -> A -> A -> Prop.
-  Parameter inj : nat -> A.
-  Parameter inj_inj : ∀ x y, inj x = inj y -> x = y.
+  Variable A : Type.
+  Variable oriented : A -> A -> A -> Prop.
+  Variable inj : nat -> A.
+  Variable inj_inj : ∀ x y, inj x = inj y -> x = y.
   Definition δ t := match t with [x, y, z] => oriented (inj x) (inj y) (inj z) end.
   Definition Δ := TS.For_all δ.
-  Parameter rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
-  Parameter rule2 : forall a b c, δ [a, b, c] -> ¬δ [c, b, a].
-  Parameter rule3 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] ∨ δ [c, b, a].
-  Parameter rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
-  Parameter rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
-  Parameter hyps : TS.t.
+  Variable rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
+  Variable rule2 : forall a b c, δ [a, b, c] -> ¬δ [c, b, a].
+  Variable rule3 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] ∨ δ [c, b, a].
+  Variable rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
+  Variable rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
+  Variable hyps : TS.t.
   Hypothesis hyps_spec : Δ hyps.
-  Parameter ziel : Triangle.t.
+  Variable ziel : Triangle.t.
   Hypothesis ziel_not_degenerate : match ziel with [a, b, c] => distinct a b c end.
 
   Lemma Conseqs_imm_spec : forall ts ts', Conseqs_imm ts ts' -> Δ ts -> Δ ts'.
@@ -479,13 +480,12 @@ Section FINAL.
       [a, b, c] => [c, b, a]
     end.
   
-  Hypothesis refute_true : refute (TS.add (sym_triangle ziel) hyps) = true.
-
-  Theorem cool : δ ziel.
+  Theorem hyps_implies_ziel : refute (TS.add (sym_triangle ziel) hyps) = true -> δ ziel.
   Proof.
+    intro H.
     destruct ziel as (a, (b, c)). destruct ziel_not_degenerate as [Ha [Hb Hc]].
-    destruct (rule3 a b c); eauto. exfalso. simpl in refute_true.
-    eapply refute_spec. with (TS.add [c, b, a] hyps). eauto.
+    destruct (rule3 a b c); eauto. exfalso. simpl in H.
+    eapply refute_spec with (TS.add [c, b, a] hyps); eauto.
     eauto using Δ_is_additive.
   Qed.    
 
