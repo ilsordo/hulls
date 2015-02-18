@@ -427,10 +427,16 @@ Section FINAL.
   Definition b_pb ts := support ts < bound.
 
   Variable rule1 : forall a b c, δ [a, b, c] -> δ [b, c, a].
+
   Variable rule2 : forall a b c, δ [a, b, c] -> ¬δ [c, b, a].
-  Variable rule3 : forall a b c, a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] ∨ δ [c, b, a].
+
+  Variable rule3 : forall a b c, 
+  a < bound -> b < bound -> c < bound ->
+  a ≠ b -> b ≠ c -> c ≠ a -> δ [a, b, c] ∨ δ [c, b, a].
+
   Variable rule4 : forall a b c d, δ [a, b, d] -> δ [b, c, d] -> δ [c, a, d] -> δ [a, b, c].
-  Variable rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] -> δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
+  Variable rule5 : forall a b c d e, δ [a, b, c] -> δ [a, b, d] -> δ [a, b, e] ->
+                      δ [a, c, d] -> δ [a, d, e] -> δ [a, c, e].
   Variable hyps : TS.t.
   Hypothesis hyps_spec : Δ hyps.
   Variable ziel : Triangle.t.
@@ -621,13 +627,25 @@ Qed.
     apply b_ps_enum; exact bts.
   Qed.    
 
-  Theorem hyps_implies_ziel : refute (TS.add (sym_triangle ziel) hyps) = true -> δ ziel.
+  Theorem hyps_implies_ziel :  
+    refute (TS.add (sym_triangle ziel) hyps) = true -> δ ziel.
   Proof.
-    intro H.
+    intros H.
     destruct ziel as (a, (b, c)). destruct ziel_not_degenerate as [Ha [Hb Hc]].
-    destruct (rule3 a b c); eauto. exfalso. simpl in H.
+    assert ( tmp := support_spec2 (TS.add [c, b, a] hyps) [c, b, a]).
+    simpl in tmp |- *.
+    assert (tmp' : TS.mem [c, b, a] (TS.add [c, b, a] hyps) = true).
+     rewrite SetFacts.add_b; unfold SetFacts.eqb; 
+     destruct (TS.E.eq_dec [c, b, a] [c, b, a]) as [_ | abs];[|case abs];
+     reflexivity.
+    apply tmp in tmp'.
+    destruct (rule3 a b c); eauto.
+       apply le_lt_trans with (2 := hyps_b); tauto.    
+      apply le_lt_trans with (2 := hyps_b); tauto.    
+     apply le_lt_trans with (2 := hyps_b); tauto.    
+    exfalso. simpl in H.
     eapply refute_spec with (TS.add [c, b, a] hyps); eauto.
-    eauto using Δ_is_additive.
+    apply Δ_is_additive; auto.
   Qed.    
 
 End FINAL.
